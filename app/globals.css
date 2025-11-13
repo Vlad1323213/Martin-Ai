@@ -1,0 +1,407 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  max-width: 100dvw;
+  overflow-x: hidden;
+  background-color: #000000;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100dvw;
+  position: fixed;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+}
+
+/* Telegram Mini App specific styles */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 390px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a2a2a;
+}
+
+/* Animation for cards */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Logo animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* User message gradient - серо-белый без анимации */
+.user-message-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(160, 160, 160, 0.25) 50%, rgba(255, 255, 255, 0.15) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* User avatar gradient - серо-белый без анимации */
+.user-avatar-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(160, 160, 160, 0.3) 50%, rgba(255, 255, 255, 0.2) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar globally but keep scroll functionality */
+/* Для всех браузеров */
+*::-webkit-scrollbar,
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+*,
+body,
+html {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  -webkit-overflow-scrolling: touch;  /* Smooth scrolling на iOS */
+}
+
+/* Дополнительно для iOS Safari */
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;  /* Убирает bounce эффект */
+}
+
+/* Для всех scrollable элементов на мобильных */
+div[class*="overflow"],
+.overflow-auto,
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+div[class*="overflow"]::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Cursor blink animation */
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
+/* Gemini-style smooth gradient animation with minimalist colors */
+@keyframes gradient-spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes smooth-fade-in-out {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.ai-message-animated {
+  position: relative;
+  background: #0a0a0a;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ai-message-animated::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 60%,
+    rgba(255, 255, 255, 0.15) 65%,
+    rgba(200, 220, 255, 0.3) 70%,
+    rgba(180, 200, 255, 0.4) 75%,
+    rgba(200, 220, 255, 0.3) 80%,
+    rgba(255, 255, 255, 0.15) 85%,
+    transparent 90%,
+    transparent 100%
+  );
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: gradient-spin 7s ease-in-out forwards, smooth-fade-in-out 7s ease-in-out forwards;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ai-message-animated::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: #0a0a0a;
+  border-radius: 15px;
+  z-index: 1;
+}
+
+.ai-message-animated > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Static border for AI messages */
+.ai-message-bordered {
+  position: relative;
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+}
+
+/* Input field animation - Gemini-style beautiful appearance and glow */
+@keyframes border-glow-appear {
+  0% {
+    opacity: 0;
+    background-position: 0% 0%;
+  }
+  100% {
+    opacity: 1;
+    background-position: 200% 0%;
+  }
+}
+
+@keyframes border-glow-loop {
+  0%, 100% {
+    box-shadow: 
+      -2px 0 12px rgba(100, 150, 255, 0.6),
+      0 0 6px rgba(150, 180, 255, 0.4);
+  }
+  25% {
+    box-shadow: 
+      0 -2px 12px rgba(150, 180, 255, 0.6),
+      0 0 8px rgba(180, 200, 255, 0.5);
+  }
+  50% {
+    box-shadow: 
+      2px 0 12px rgba(180, 200, 255, 0.7),
+      0 0 10px rgba(200, 220, 255, 0.5);
+  }
+  75% {
+    box-shadow: 
+      0 2px 12px rgba(150, 180, 255, 0.6),
+      0 0 8px rgba(180, 200, 255, 0.5);
+  }
+}
+
+.input-animated {
+  position: relative;
+  background: #1a1a1c;
+  overflow: visible;
+}
+
+.input-animated::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  padding: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(100, 150, 255, 0.4) 25%,
+    rgba(150, 180, 255, 0.6) 40%,
+    rgba(180, 200, 255, 0.7) 50%,
+    rgba(150, 180, 255, 0.6) 60%,
+    rgba(100, 150, 255, 0.4) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: border-glow-appear 1.5s ease-out forwards, border-glow-loop 4s ease-in-out 1.5s infinite;
+  z-index: 1;
+}
+
+.input-animated > * {
+  position: relative;
+  z-index: 2;
+}
+
+.input-not-animated {
+  background: #1a1a1c;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all 0.6s ease-out;
+}
+
+.input-not-animated::before {
+  content: none;
+}
+
+/* ChatGPT-style typing indicator - three dots */
+@keyframes chatgpt-dot-fade {
+  0%, 60%, 100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+.chatgpt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
+  animation: chatgpt-dot-fade 1.4s ease-in-out infinite;
+}
+
