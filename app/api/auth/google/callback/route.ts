@@ -125,38 +125,34 @@ export async function GET(request: NextRequest) {
                 📅 Google Calendar подключен
               </div>
               
-              <button class="button" onclick="closeWindow()">Вернуться в Telegram</button>
+              <button class="button" onclick="closeWindow()">Закрыть и вернуться</button>
               
               <div class="instructions">
-                После закрытия вкладки вернитесь в Telegram<br>
-                Аккаунт уже подключен и готов к использованию!
+                ✅ Можете закрыть это окно и вернуться в Telegram<br>
+                Ваш Google аккаунт готов к использованию!
               </div>
             </div>
             <script>
               console.log('✅ Tokens saved on server for user: ${userId}');
               
+              // Попытка закрыть вкладку/окно
               function closeWindow() {
-                // Пытаемся вернуться в Telegram через tg://
-                const telegramUrl = 'tg://resolve?domain=martinaibot';
-                window.location.href = telegramUrl;
-                
-                // Через 1 секунду пробуем закрыть окно
-                setTimeout(() => {
-                  window.close();
+                try {
+                  // Для окон открытых через window.open
+                  if (window.opener) {
+                    window.close();
+                    return;
+                  }
                   
-                  // Если не получилось - показываем alert
-                  setTimeout(() => {
-                    if (!window.closed) {
-                      alert('Пожалуйста, вернитесь в Telegram вручную.\\n\\nВаш Google аккаунт уже подключен!');
-                    }
-                  }, 500);
-                }, 1000);
+                  // Для вкладок - показываем что можно закрыть
+                  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;text-align:center;padding:20px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;"><div style="max-width:400px;"><div style="font-size:64px;margin-bottom:20px;">✅</div><h2 style="margin-bottom:20px;">Все готово!</h2><p style="font-size:18px;margin-bottom:20px;">Google аккаунт успешно подключен</p><p style="opacity:0.9;">Можете закрыть эту вкладку и вернуться в Telegram</p></div></div>';
+                } catch (e) {
+                  console.error('Cannot close window:', e);
+                }
               }
               
-              // Автоматически пытаемся вернуться через 3 секунды
-              setTimeout(() => {
-                closeWindow();
-              }, 3000);
+              // Автоматически закрываем через 2 секунды
+              setTimeout(closeWindow, 2000);
             </script>
           </body>
         </html>

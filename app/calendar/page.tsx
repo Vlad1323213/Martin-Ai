@@ -29,9 +29,11 @@ export default function CalendarPage() {
 
   const fetchEvents = async () => {
     if (!user) {
-      console.log('No user ID available')
+      console.log('❌ No user ID available')
       return
     }
+    
+    console.log('🔍 Fetching events for user:', user.id)
     
     try {
       setLoading(true)
@@ -40,11 +42,25 @@ export default function CalendarPage() {
       const tokensResponse = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
       const tokensData = await tokensResponse.json()
       
+      console.log('📊 Tokens response:', tokensData)
+      
       if (!tokensData.connected) {
-        console.log('Google not connected')
-        setEvents([])
+        console.log('❌ Google not connected - showing demo events')
+        // Показываем демо события чтобы видеть что календарь работает
+        setEvents([
+          {
+            id: 'demo1',
+            title: '⚠️ Google не подключен',
+            description: 'Подключите Google в настройках чтобы видеть реальные события',
+            startTime: new Date(),
+            endTime: new Date(Date.now() + 3600000),
+            location: '',
+          },
+        ])
         return
       }
+      
+      console.log('✅ Google connected, fetching calendar events...')
       
       const tokens = tokensData.tokens
       

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTokens, disconnect, isConnected } from '@/lib/token-storage'
+import { getTokens, disconnect } from '@/lib/token-storage'
 
 /**
  * GET /api/tokens?userId=123&provider=google
@@ -68,34 +68,5 @@ export async function DELETE(request: NextRequest) {
     )
   }
 }
-
-/**
- * POST /api/tokens/check
- * Check if user has connected providers
- */
-export async function POST(request: NextRequest) {
-  try {
-    const { userId } = await request.json()
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 }
-      )
-    }
-
-    return NextResponse.json({
-      google: await isConnected(userId, 'google'),
-      yandex: await isConnected(userId, 'yandex'),
-    })
-  } catch (error) {
-    console.error('Check tokens error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
 
 
