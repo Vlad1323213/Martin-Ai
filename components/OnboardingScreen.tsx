@@ -9,34 +9,37 @@ interface OnboardingScreenProps {
 }
 
 // Тексты вынесены наружу компонента
-const texts = [
-  'Ваш умный помощник для задач и встреч',
-  'Ваш помощник для управления календарем',
-  'Ваш помощник для работы с почтой',
-  'Ваш помощник для повышения продуктивности',
+const textEndings = [
+  ' для задач и встреч',
+  ' для управления календарем',
+  ' для работы с почтой',
+  ' для повышения продуктивности',
 ]
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const { user } = useTelegram()
   const [connecting, setConnecting] = useState(false)
-  const [displayedText, setDisplayedText] = useState('')
+  const [displayedText, setDisplayedText] = useState('Ваш помощник')
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [animationComplete, setAnimationComplete] = useState(false)
 
-  // Анимация печати и стирания текста (циклично)
+  // Анимация печати и стирания текста (один полный цикл)
   useEffect(() => {
+    if (animationComplete) return
+
     let currentIndex = 0
     let isDeleting = false
-    const currentText = texts[currentTextIndex]
-    const typingSpeed = 80
+    const baseText = 'Ваш помощник'
+    const ending = textEndings[currentTextIndex]
     let timeoutId: NodeJS.Timeout
 
     const animate = () => {
       if (!isDeleting) {
-        // Печатаем
-        if (currentIndex <= currentText.length) {
-          setDisplayedText(currentText.slice(0, currentIndex))
+        // Печатаем окончание
+        if (currentIndex <= ending.length) {
+          setDisplayedText(baseText + ending.slice(0, currentIndex))
           currentIndex++
-          timeoutId = setTimeout(animate, typingSpeed)
+          timeoutId = setTimeout(animate, 80)
         } else {
           // Пауза перед стиранием
           timeoutId = setTimeout(() => {
@@ -45,17 +48,22 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           }, 2000)
         }
       } else {
-        // Стираем до "Ваш помощник"
-        const keepText = 'Ваш помощник'
-        if (currentIndex > keepText.length) {
+        // Стираем окончание
+        if (currentIndex > 0) {
           currentIndex--
-          setDisplayedText(currentText.slice(0, currentIndex))
+          setDisplayedText(baseText + ending.slice(0, currentIndex))
           timeoutId = setTimeout(animate, 40)
         } else {
-          // Переходим к следующему тексту
-          timeoutId = setTimeout(() => {
-            setCurrentTextIndex((prev) => (prev + 1) % texts.length)
-          }, 500)
+          // Переходим к следующему тексту или завершаем
+          if (currentTextIndex < textEndings.length - 1) {
+            timeoutId = setTimeout(() => {
+              setCurrentTextIndex((prev) => prev + 1)
+            }, 300)
+          } else {
+            // Анимация завершена, показываем первый вариант
+            setDisplayedText(baseText + textEndings[0])
+            setAnimationComplete(true)
+          }
         }
       }
     }
@@ -65,7 +73,38 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     return () => {
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [currentTextIndex])
+  }, [currentTextIndex, animationComplete])
+
+  // Проверка подключения при возвращении в приложение
+  useEffect(() => {
+    if (!connecting || !user) return
+
+    const checkInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
+        const data = await response.json()
+        
+        if (data.connected) {
+          clearInterval(checkInterval)
+          setConnecting(false)
+          onComplete()
+        }
+      } catch (error) {
+        console.error('Error checking connection:', error)
+      }
+    }, 2000)
+
+    // Останавливаем проверку через 5 минут
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval)
+      setConnecting(false)
+    }, 300000)
+
+    return () => {
+      clearInterval(checkInterval)
+      clearTimeout(timeoutId)
+    }
+  }, [connecting, user, onComplete])
 
   const handleConnectGoogle = () => {
     if (!user) {
@@ -86,37 +125,13 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       // В обычном браузере
       window.open(authUrl, '_blank')
     }
-
-    // Проверяем статус каждые 2 секунды
-    const checkInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
-        const data = await response.json()
-        
-        if (data.connected) {
-          clearInterval(checkInterval)
-          setConnecting(false)
-          onComplete()
-        }
-      } catch (error) {
-        console.error('Error checking connection:', error)
-      }
-    }, 2000)
-
-    // Останавливаем проверку через 5 минут
-    setTimeout(() => {
-      clearInterval(checkInterval)
-      setConnecting(false)
-    }, 300000)
   }
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden bg-black">
-      {/* OpenAI-style градиенты на фоне */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="openai-gradient-1" />
-        <div className="openai-gradient-2" />
-        <div className="openai-gradient-3" />
+      {/* Градиенты только снизу */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="openai-gradient-bottom" />
       </div>
 
       {/* Контент */}
@@ -142,7 +157,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         {/* Подзаголовок с анимацией печати и стирания */}
         <div className="text-gray-400 text-center mb-16 text-base min-h-[24px] onboarding-fade-in" style={{ animationDelay: '0.8s' }}>
           {displayedText}
-          <span className="inline-block w-0.5 h-4 bg-gray-400 ml-1 animate-pulse" />
+          {!animationComplete && (
+            <span className="inline-block w-0.5 h-4 bg-gray-400 ml-1 animate-pulse" />
+          )}
         </div>
 
         {/* Контейнер с кнопкой */}

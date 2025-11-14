@@ -311,12 +311,10 @@ export default function Home() {
     return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
   }
 
-  // Показываем загрузку пока проверяем
+  // Показываем черный экран пока проверяем
   if (checkingConnection) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <div className="text-white">Загрузка...</div>
-      </div>
+      <div className="flex items-center justify-center h-screen bg-black" />
     )
   }
 
