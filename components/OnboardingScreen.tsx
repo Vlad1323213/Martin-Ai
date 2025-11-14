@@ -14,7 +14,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [displayedText, setDisplayedText] = useState('')
   const fullText = 'Ваш умный помощник для задач и встреч'
 
-  // Анимация печати текста
+  // Анимация печати текста (медленнее и плавнее для Telegram Mini App)
   useEffect(() => {
     let currentIndex = 0
     const typingInterval = setInterval(() => {
@@ -24,7 +24,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       } else {
         clearInterval(typingInterval)
       }
-    }, 50)
+    }, 80) // Замедлил с 50ms до 80ms
 
     return () => clearInterval(typingInterval)
   }, [])
@@ -73,19 +73,11 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-black px-6 overflow-hidden">
-      {/* Анимированный фон */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Градиентные шары */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#7dd3c0] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
-        <div className="absolute top-40 right-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-20 left-1/2 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000" />
-      </div>
-
+    <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden onboarding-gradient">
       {/* Контент */}
-      <div className="relative z-10 flex flex-col items-center">
+      <div className="relative z-10 flex flex-col items-center w-full">
         {/* Логотип (смещен чуть левее) */}
-        <div className="mb-8 relative -ml-1 animate-fade-in">
+        <div className="mb-8 relative -ml-1 onboarding-fade-in">
           <div className="relative w-28 h-28 rounded-3xl overflow-hidden">
             <Image
               src="/logo-new.jpg"
@@ -98,18 +90,20 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         </div>
 
         {/* Заголовок */}
-        <h1 className="text-5xl font-bold text-white mb-3 text-center animate-fade-in animation-delay-300">
+        <h1 className="text-5xl font-bold text-white mb-3 text-center onboarding-fade-in" style={{ animationDelay: '0.4s' }}>
           Привет, <span className="text-[#7dd3c0]">Martin</span>
         </h1>
 
         {/* Подзаголовок с анимацией печати */}
-        <div className="text-gray-400 text-center mb-16 text-base h-6 animate-fade-in animation-delay-600">
+        <div className="text-gray-400 text-center mb-16 text-base min-h-[24px] onboarding-fade-in" style={{ animationDelay: '0.8s' }}>
           {displayedText}
-          <span className="animate-pulse">|</span>
+          {displayedText.length < fullText.length && (
+            <span className="inline-block w-0.5 h-4 bg-gray-400 ml-1 animate-pulse" />
+          )}
         </div>
 
         {/* Контейнер с кнопкой */}
-        <div className="w-full max-w-md bg-[#1c1c1e] rounded-3xl p-6 animate-fade-in animation-delay-900">
+        <div className="w-full max-w-md bg-[#1c1c1e] rounded-3xl p-6 onboarding-fade-in" style={{ animationDelay: '1.2s' }}>
         {/* Кнопка Google */}
         <button
           onClick={handleConnectGoogle}
