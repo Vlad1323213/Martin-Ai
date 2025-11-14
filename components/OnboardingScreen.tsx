@@ -11,6 +11,23 @@ interface OnboardingScreenProps {
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const { user } = useTelegram()
   const [connecting, setConnecting] = useState(false)
+  const [displayedText, setDisplayedText] = useState('')
+  const fullText = 'Ваш умный помощник для задач и встреч'
+
+  // Анимация печати текста
+  useEffect(() => {
+    let currentIndex = 0
+    const typingInterval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setDisplayedText(fullText.slice(0, currentIndex))
+        currentIndex++
+      } else {
+        clearInterval(typingInterval)
+      }
+    }, 50)
+
+    return () => clearInterval(typingInterval)
+  }, [])
 
   const handleConnectGoogle = () => {
     if (!user) {
@@ -56,32 +73,43 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black px-6">
-      {/* Логотип (смещен чуть левее) */}
-      <div className="mb-8 relative -ml-1">
-        <div className="relative w-28 h-28 rounded-3xl overflow-hidden">
-          <Image
-            src="/logo-new.jpg"
-            alt="Martin AI"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
+    <div className="relative flex flex-col items-center justify-center min-h-screen bg-black px-6 overflow-hidden">
+      {/* Анимированный фон */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Градиентные шары */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-[#7dd3c0] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+        <div className="absolute top-40 right-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-20 left-1/2 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000" />
       </div>
 
-      {/* Заголовок */}
-      <h1 className="text-5xl font-bold text-white mb-3 text-center">
-        Привет, <span className="text-[#7dd3c0]">Martin</span>
-      </h1>
+      {/* Контент */}
+      <div className="relative z-10 flex flex-col items-center">
+        {/* Логотип (смещен чуть левее) */}
+        <div className="mb-8 relative -ml-1 animate-fade-in">
+          <div className="relative w-28 h-28 rounded-3xl overflow-hidden">
+            <Image
+              src="/logo-new.jpg"
+              alt="Martin AI"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        </div>
 
-      {/* Подзаголовок */}
-      <p className="text-gray-400 text-center mb-16 text-base">
-        Календарь встречается с интеллектом.
-      </p>
+        {/* Заголовок */}
+        <h1 className="text-5xl font-bold text-white mb-3 text-center animate-fade-in animation-delay-300">
+          Привет, <span className="text-[#7dd3c0]">Martin</span>
+        </h1>
 
-      {/* Контейнер с кнопкой */}
-      <div className="w-full max-w-md bg-[#1c1c1e] rounded-3xl p-6">
+        {/* Подзаголовок с анимацией печати */}
+        <div className="text-gray-400 text-center mb-16 text-base h-6 animate-fade-in animation-delay-600">
+          {displayedText}
+          <span className="animate-pulse">|</span>
+        </div>
+
+        {/* Контейнер с кнопкой */}
+        <div className="w-full max-w-md bg-[#1c1c1e] rounded-3xl p-6 animate-fade-in animation-delay-900">
         {/* Кнопка Google */}
         <button
           onClick={handleConnectGoogle}
@@ -97,10 +125,11 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           {connecting ? 'Подключение...' : 'Продолжить с Google'}
         </button>
 
-        {/* Описание */}
-        <p className="text-gray-400 text-center text-sm">
-          Создан для выполнения задач.
-        </p>
+          {/* Описание */}
+          <p className="text-gray-400 text-center text-sm">
+            Создан для выполнения задач.
+          </p>
+        </div>
       </div>
     </div>
   )
