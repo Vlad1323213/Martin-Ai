@@ -10,16 +10,16 @@ interface OnboardingScreenProps {
 
 // Тексты вынесены наружу компонента
 const textEndings = [
-  ' для задач и встреч',
-  ' для управления календарем',
-  ' для работы с почтой',
-  ' для повышения продуктивности',
+  'задач и встреч',
+  'управления календарем',
+  'работы с почтой',
+  'повышения продуктивности',
 ]
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const { user } = useTelegram()
   const [connecting, setConnecting] = useState(false)
-  const [displayedText, setDisplayedText] = useState('Ваш помощник')
+  const [displayedText, setDisplayedText] = useState('Ваш помощник для ')
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
   const [animationComplete, setAnimationComplete] = useState(false)
 
@@ -29,7 +29,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
     let currentIndex = 0
     let isDeleting = false
-    const baseText = 'Ваш помощник'
+    const baseText = 'Ваш помощник для '
     const ending = textEndings[currentTextIndex]
     let timeoutId: NodeJS.Timeout
 
@@ -48,7 +48,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           }, 2000)
         }
       } else {
-        // Стираем окончание
+        // Стираем окончание (оставляем "Ваш помощник для ")
         if (currentIndex > 0) {
           currentIndex--
           setDisplayedText(baseText + ending.slice(0, currentIndex))
@@ -60,8 +60,8 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               setCurrentTextIndex((prev) => prev + 1)
             }, 300)
           } else {
-            // Анимация завершена, показываем первый вариант
-            setDisplayedText(baseText + textEndings[0])
+            // Анимация завершена, показываем ПОСЛЕДНИЙ вариант
+            setDisplayedText(baseText + textEndings[textEndings.length - 1])
             setAnimationComplete(true)
           }
         }
