@@ -21,7 +21,7 @@ export default function Header({ onMenuClick, onSettingsClick }: HeaderProps) {
 
       <div className="flex items-center justify-center ml-3">
         <div className="relative">
-          <LogoStatic size={40} className="drop-shadow-lg" />
+          <LogoStatic size={50} className="drop-shadow-lg" />
         </div>
       </div>
 
