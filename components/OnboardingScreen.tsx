@@ -147,12 +147,12 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Логотип (смещен чуть левее) */}
         <div className="mb-8 relative -ml-1 onboarding-fade-in">
-          <div className="relative w-28 h-28 rounded-3xl overflow-hidden">
+          <div className="relative w-28 h-28 rounded-3xl overflow-hidden border-0 shadow-none">
             <Image
               src="/logo-new.jpg"
               alt="Martin AI"
               fill
-              className="object-cover"
+              className="object-cover border-0"
               priority
             />
           </div>
