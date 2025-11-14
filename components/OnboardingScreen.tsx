@@ -147,7 +147,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Логотип */}
         <div className="mb-8 relative onboarding-fade-in">
-          <div className="relative w-20 h-20 rounded-full overflow-hidden border-0 shadow-none flex items-center justify-center bg-black p-3">
+          <div className="relative w-16 h-16 rounded-full overflow-hidden border-0 shadow-none flex items-center justify-center bg-black p-1">
             <div className="relative w-full h-full flex items-center justify-center">
               <Image
                 src="/logo-new.jpg"
