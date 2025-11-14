@@ -8,25 +8,27 @@ interface OnboardingScreenProps {
   onComplete: () => void
 }
 
+// Тексты вынесены наружу компонента
+const texts = [
+  'Ваш умный помощник для задач и встреч',
+  'Ваш помощник для управления календарем',
+  'Ваш помощник для работы с почтой',
+  'Ваш помощник для повышения продуктивности',
+]
+
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const { user } = useTelegram()
   const [connecting, setConnecting] = useState(false)
   const [displayedText, setDisplayedText] = useState('')
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
-  
-  const texts = [
-    'Ваш умный помощник для задач и встреч',
-    'Ваш помощник для управления календарем',
-    'Ваш помощник для работы с почтой',
-    'Ваш помощник для повышения продуктивности',
-  ]
 
   // Анимация печати и стирания текста (циклично)
   useEffect(() => {
     let currentIndex = 0
     let isDeleting = false
-    let currentText = texts[currentTextIndex]
-    let typingSpeed = 80
+    const currentText = texts[currentTextIndex]
+    const typingSpeed = 80
+    let timeoutId: NodeJS.Timeout
 
     const animate = () => {
       if (!isDeleting) {
@@ -34,10 +36,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         if (currentIndex <= currentText.length) {
           setDisplayedText(currentText.slice(0, currentIndex))
           currentIndex++
-          setTimeout(animate, typingSpeed)
+          timeoutId = setTimeout(animate, typingSpeed)
         } else {
           // Пауза перед стиранием
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             isDeleting = true
             animate()
           }, 2000)
@@ -48,10 +50,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         if (currentIndex > keepText.length) {
           currentIndex--
           setDisplayedText(currentText.slice(0, currentIndex))
-          setTimeout(animate, 40)
+          timeoutId = setTimeout(animate, 40)
         } else {
           // Переходим к следующему тексту
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             setCurrentTextIndex((prev) => (prev + 1) % texts.length)
           }, 500)
         }
@@ -59,6 +61,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     }
 
     animate()
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [currentTextIndex])
 
   const handleConnectGoogle = () => {
