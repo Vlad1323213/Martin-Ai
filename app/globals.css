@@ -405,82 +405,73 @@ div[class*="overflow"]::-webkit-scrollbar,
   animation: chatgpt-dot-fade 1.4s ease-in-out infinite;
 }
 
-/* Четкий яркий градиент с красивым переливанием */
+/* Яркий градиент точно как на фото - без полоски */
 .vibrant-gradient-bottom {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 50vh;
+  height: 60vh;
   overflow: hidden;
 }
 
-.vibrant-gradient-bottom::before,
+.vibrant-gradient-bottom::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(
+      ellipse 900px 700px at 0% 100%,
+      rgba(220, 38, 38, 1) 0%,
+      rgba(251, 146, 60, 0.95) 25%,
+      rgba(251, 191, 36, 0.9) 45%,
+      rgba(251, 191, 36, 0.3) 65%,
+      transparent 80%
+    ),
+    radial-gradient(
+      ellipse 900px 700px at 100% 100%,
+      rgba(59, 130, 246, 0.95) 0%,
+      rgba(96, 165, 250, 0.9) 30%,
+      rgba(147, 197, 253, 0.5) 55%,
+      transparent 80%
+    ),
+    radial-gradient(
+      ellipse 1200px 600px at 50% 100%,
+      rgba(251, 191, 36, 0.6) 0%,
+      rgba(251, 146, 60, 0.4) 35%,
+      transparent 65%
+    ),
+    linear-gradient(
+      to top,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) 55%,
+      rgba(0, 0, 0, 0.8) 75%,
+      rgba(0, 0, 0, 1) 90%
+    );
+  filter: blur(100px);
+  animation: gradient-flow 10s ease-in-out infinite;
+}
+
 .vibrant-gradient-bottom::after {
   content: '';
   position: absolute;
   width: 100%;
   height: 100%;
-  mix-blend-mode: screen;
-}
-
-/* Основной слой градиента - как на фото */
-.vibrant-gradient-bottom::before {
   background: 
-    linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 0.95) 10%,
-      rgba(0, 0, 0, 0.7) 20%,
-      rgba(0, 0, 0, 0.3) 30%,
-      transparent 40%
-    ),
     radial-gradient(
-      ellipse 800px 600px at 10% 100%,
-      rgba(220, 38, 38, 0.8) 0%,
-      rgba(251, 146, 60, 0.7) 30%,
-      rgba(251, 191, 36, 0.6) 50%,
-      transparent 75%
-    ),
-    radial-gradient(
-      ellipse 800px 600px at 90% 100%,
-      rgba(59, 130, 246, 0.7) 0%,
-      rgba(96, 165, 250, 0.6) 40%,
-      transparent 75%
-    ),
-    radial-gradient(
-      ellipse 1000px 500px at 50% 100%,
-      rgba(251, 191, 36, 0.5) 0%,
-      rgba(251, 146, 60, 0.4) 30%,
+      ellipse 700px 600px at 10% 95%,
+      rgba(239, 68, 68, 0.8) 0%,
+      rgba(251, 146, 60, 0.5) 30%,
       transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 600px at 90% 95%,
+      rgba(59, 130, 246, 0.7) 0%,
+      rgba(96, 165, 250, 0.4) 35%,
+      transparent 65%
     );
   filter: blur(80px);
-  opacity: 1;
-  animation: gradient-flow 10s ease-in-out infinite;
-}
-
-/* Переливающиеся узоры - как на фото */
-.vibrant-gradient-bottom::after {
-  background: 
-    radial-gradient(
-      ellipse 600px 500px at 15% 95%,
-      rgba(239, 68, 68, 0.6) 0%,
-      rgba(251, 146, 60, 0.4) 35%,
-      transparent 65%
-    ),
-    radial-gradient(
-      ellipse 500px 400px at 85% 95%,
-      rgba(59, 130, 246, 0.5) 0%,
-      rgba(96, 165, 250, 0.3) 40%,
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse 700px 400px at 50% 90%,
-      rgba(251, 191, 36, 0.4) 0%,
-      rgba(251, 146, 60, 0.3) 30%,
-      transparent 60%
-    );
-  filter: blur(60px);
   animation: gradient-shimmer 12s ease-in-out infinite;
 }
 
