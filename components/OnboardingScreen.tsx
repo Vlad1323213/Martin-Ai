@@ -158,7 +158,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           <div className="relative w-16 h-16 rounded-full overflow-hidden border-0 shadow-none flex items-center justify-center bg-black p-1">
             <div className="relative w-full h-full flex items-center justify-center">
               <Image
-                src="/logo-new.jpg"
+                src="/photo_2025-11-14_15-47-54.jpg"
                 alt="Martin AI"
                 width={56}
                 height={56}
