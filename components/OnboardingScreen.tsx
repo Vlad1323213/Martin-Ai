@@ -12,22 +12,54 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const { user } = useTelegram()
   const [connecting, setConnecting] = useState(false)
   const [displayedText, setDisplayedText] = useState('')
-  const fullText = 'Ваш умный помощник для задач и встреч'
+  const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  
+  const texts = [
+    'Ваш умный помощник для задач и встреч',
+    'Ваш помощник для управления календарем',
+    'Ваш помощник для работы с почтой',
+    'Ваш помощник для повышения продуктивности',
+  ]
 
-  // Анимация печати текста (медленнее и плавнее для Telegram Mini App)
+  // Анимация печати и стирания текста (циклично)
   useEffect(() => {
     let currentIndex = 0
-    const typingInterval = setInterval(() => {
-      if (currentIndex <= fullText.length) {
-        setDisplayedText(fullText.slice(0, currentIndex))
-        currentIndex++
-      } else {
-        clearInterval(typingInterval)
-      }
-    }, 80) // Замедлил с 50ms до 80ms
+    let isDeleting = false
+    let currentText = texts[currentTextIndex]
+    let typingSpeed = 80
 
-    return () => clearInterval(typingInterval)
-  }, [])
+    const animate = () => {
+      if (!isDeleting) {
+        // Печатаем
+        if (currentIndex <= currentText.length) {
+          setDisplayedText(currentText.slice(0, currentIndex))
+          currentIndex++
+          setTimeout(animate, typingSpeed)
+        } else {
+          // Пауза перед стиранием
+          setTimeout(() => {
+            isDeleting = true
+            animate()
+          }, 2000)
+        }
+      } else {
+        // Стираем до "Ваш помощник"
+        const keepText = 'Ваш помощник'
+        if (currentIndex > keepText.length) {
+          currentIndex--
+          setDisplayedText(currentText.slice(0, currentIndex))
+          setTimeout(animate, 40)
+        } else {
+          // Переходим к следующему тексту
+          setTimeout(() => {
+            setCurrentTextIndex((prev) => (prev + 1) % texts.length)
+          }, 500)
+        }
+      }
+    }
+
+    animate()
+  }, [currentTextIndex])
 
   const handleConnectGoogle = () => {
     if (!user) {
@@ -73,7 +105,14 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden onboarding-gradient">
+    <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden bg-black">
+      {/* OpenAI-style градиенты на фоне */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="openai-gradient-1" />
+        <div className="openai-gradient-2" />
+        <div className="openai-gradient-3" />
+      </div>
+
       {/* Контент */}
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Логотип (смещен чуть левее) */}
@@ -94,12 +133,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           Привет, <span className="text-[#7dd3c0]">Martin</span>
         </h1>
 
-        {/* Подзаголовок с анимацией печати */}
+        {/* Подзаголовок с анимацией печати и стирания */}
         <div className="text-gray-400 text-center mb-16 text-base min-h-[24px] onboarding-fade-in" style={{ animationDelay: '0.8s' }}>
           {displayedText}
-          {displayedText.length < fullText.length && (
-            <span className="inline-block w-0.5 h-4 bg-gray-400 ml-1 animate-pulse" />
-          )}
+          <span className="inline-block w-0.5 h-4 bg-gray-400 ml-1 animate-pulse" />
         </div>
 
         {/* Контейнер с кнопкой */}
