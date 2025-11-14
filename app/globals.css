@@ -424,45 +424,63 @@ div[class*="overflow"]::-webkit-scrollbar,
   mix-blend-mode: screen;
 }
 
-/* Основной слой градиента */
+/* Основной слой градиента - как на фото */
 .vibrant-gradient-bottom::before {
   background: 
     linear-gradient(
       180deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0) 5%,
-      rgba(14, 165, 233, 0.15) 15%,
-      rgba(14, 165, 233, 0.4) 25%,
-      rgba(125, 211, 192, 0.5) 40%,
-      rgba(251, 191, 36, 0.45) 60%,
-      rgba(251, 146, 60, 0.5) 75%,
-      rgba(239, 68, 68, 0.4) 88%,
-      rgba(220, 38, 38, 0.35) 100%
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.95) 10%,
+      rgba(0, 0, 0, 0.7) 20%,
+      rgba(0, 0, 0, 0.3) 30%,
+      transparent 40%
+    ),
+    radial-gradient(
+      ellipse 800px 600px at 10% 100%,
+      rgba(220, 38, 38, 0.8) 0%,
+      rgba(251, 146, 60, 0.7) 30%,
+      rgba(251, 191, 36, 0.6) 50%,
+      transparent 75%
+    ),
+    radial-gradient(
+      ellipse 800px 600px at 90% 100%,
+      rgba(59, 130, 246, 0.7) 0%,
+      rgba(96, 165, 250, 0.6) 40%,
+      transparent 75%
+    ),
+    radial-gradient(
+      ellipse 1000px 500px at 50% 100%,
+      rgba(251, 191, 36, 0.5) 0%,
+      rgba(251, 146, 60, 0.4) 30%,
+      transparent 60%
     );
-  filter: blur(60px);
-  opacity: 0.9;
+  filter: blur(80px);
+  opacity: 1;
   animation: gradient-flow 10s ease-in-out infinite;
 }
 
-/* Переливающиеся пятна */
+/* Переливающиеся узоры - как на фото */
 .vibrant-gradient-bottom::after {
   background: 
     radial-gradient(
-      ellipse 600px 400px at 20% 80%,
-      rgba(125, 211, 192, 0.6) 0%,
-      transparent 50%
+      ellipse 600px 500px at 15% 95%,
+      rgba(239, 68, 68, 0.6) 0%,
+      rgba(251, 146, 60, 0.4) 35%,
+      transparent 65%
     ),
     radial-gradient(
-      ellipse 500px 350px at 80% 90%,
-      rgba(251, 191, 36, 0.5) 0%,
-      transparent 50%
+      ellipse 500px 400px at 85% 95%,
+      rgba(59, 130, 246, 0.5) 0%,
+      rgba(96, 165, 250, 0.3) 40%,
+      transparent 70%
     ),
     radial-gradient(
-      ellipse 400px 300px at 50% 70%,
-      rgba(239, 68, 68, 0.4) 0%,
-      transparent 50%
+      ellipse 700px 400px at 50% 90%,
+      rgba(251, 191, 36, 0.4) 0%,
+      rgba(251, 146, 60, 0.3) 30%,
+      transparent 60%
     );
-  filter: blur(50px);
+  filter: blur(60px);
   animation: gradient-shimmer 12s ease-in-out infinite;
 }
 
