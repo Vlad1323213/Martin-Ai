@@ -405,13 +405,27 @@ div[class*="overflow"]::-webkit-scrollbar,
   animation: chatgpt-dot-fade 1.4s ease-in-out infinite;
 }
 
-/* Четкий яркий градиент как на фото - половина экрана снизу */
+/* Четкий яркий градиент с красивым переливанием */
 .vibrant-gradient-bottom {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 50vh;
+  overflow: hidden;
+}
+
+.vibrant-gradient-bottom::before,
+.vibrant-gradient-bottom::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+}
+
+/* Основной слой градиента */
+.vibrant-gradient-bottom::before {
   background: 
     linear-gradient(
       180deg,
@@ -422,29 +436,65 @@ div[class*="overflow"]::-webkit-scrollbar,
       rgba(251, 146, 60, 0.5) 70%,
       rgba(239, 68, 68, 0.4) 85%,
       rgba(220, 38, 38, 0.35) 100%
-    ),
+    );
+  filter: blur(40px);
+  opacity: 0.9;
+  animation: gradient-flow 10s ease-in-out infinite;
+}
+
+/* Переливающиеся пятна */
+.vibrant-gradient-bottom::after {
+  background: 
     radial-gradient(
-      ellipse at 30% 80%,
+      ellipse 600px 400px at 20% 80%,
       rgba(125, 211, 192, 0.6) 0%,
       transparent 50%
     ),
     radial-gradient(
-      ellipse at 70% 90%,
+      ellipse 500px 350px at 80% 90%,
       rgba(251, 191, 36, 0.5) 0%,
       transparent 50%
+    ),
+    radial-gradient(
+      ellipse 400px 300px at 50% 70%,
+      rgba(239, 68, 68, 0.4) 0%,
+      transparent 50%
     );
-  filter: blur(40px);
-  animation: float-gradient-smooth 15s ease-in-out infinite;
-  mix-blend-mode: screen;
-  opacity: 0.9;
+  filter: blur(50px);
+  animation: gradient-shimmer 12s ease-in-out infinite;
 }
 
-@keyframes float-gradient-smooth {
+@keyframes gradient-flow {
   0%, 100% {
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+  33% {
+    transform: translateY(-15px) scale(1.05) rotate(2deg);
+    opacity: 1;
+  }
+  66% {
+    transform: translateY(-5px) scale(0.98) rotate(-2deg);
+    opacity: 0.95;
+  }
+}
+
+@keyframes gradient-shimmer {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translate(-20px, -20px) scale(1.1);
+    opacity: 0.9;
   }
   50% {
-    transform: translateY(-20px) scale(1.05);
+    transform: translate(15px, -10px) scale(1.05);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-10px, 15px) scale(0.95);
+    opacity: 0.85;
   }
 }
 

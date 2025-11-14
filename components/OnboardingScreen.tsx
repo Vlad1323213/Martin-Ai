@@ -22,10 +22,19 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [displayedText, setDisplayedText] = useState('Ваш помощник для ')
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
   const [animationComplete, setAnimationComplete] = useState(false)
+  const [animationStarted, setAnimationStarted] = useState(false)
 
   // Анимация печати и стирания текста (останавливается в конце)
   useEffect(() => {
     if (animationComplete) return
+
+    // Задержка перед началом анимации
+    if (!animationStarted) {
+      const startDelay = setTimeout(() => {
+        setAnimationStarted(true)
+      }, 800)
+      return () => clearTimeout(startDelay)
+    }
 
     let currentIndex = 0
     let isDeleting = false
@@ -40,7 +49,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         if (currentIndex <= ending.length) {
           setDisplayedText(baseText + ending.slice(0, currentIndex))
           currentIndex++
-          timeoutId = setTimeout(animate, 80)
+          timeoutId = setTimeout(animate, 70)
         } else {
           // Если это последний текст - останавливаемся
           if (isLastText) {
@@ -73,7 +82,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     return () => {
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [currentTextIndex, animationComplete])
+  }, [currentTextIndex, animationComplete, animationStarted])
 
   // Проверка подключения при возвращении в приложение
   useEffect(() => {
