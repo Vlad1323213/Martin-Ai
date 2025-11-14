@@ -23,7 +23,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
   const [animationComplete, setAnimationComplete] = useState(false)
 
-  // Анимация печати и стирания текста (один полный цикл)
+  // Анимация печати и стирания текста (останавливается в конце)
   useEffect(() => {
     if (animationComplete) return
 
@@ -32,6 +32,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     const baseText = 'Ваш помощник для '
     const ending = textEndings[currentTextIndex]
     let timeoutId: NodeJS.Timeout
+    const isLastText = currentTextIndex === textEndings.length - 1
 
     const animate = () => {
       if (!isDeleting) {
@@ -41,29 +42,28 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           currentIndex++
           timeoutId = setTimeout(animate, 80)
         } else {
-          // Пауза перед стиранием
+          // Если это последний текст - останавливаемся
+          if (isLastText) {
+            setAnimationComplete(true)
+            return
+          }
+          // Иначе - пауза перед стиранием
           timeoutId = setTimeout(() => {
             isDeleting = true
             animate()
-          }, 2000)
+          }, 1500)
         }
       } else {
         // Стираем окончание (оставляем "Ваш помощник для ")
         if (currentIndex > 0) {
           currentIndex--
           setDisplayedText(baseText + ending.slice(0, currentIndex))
-          timeoutId = setTimeout(animate, 40)
+          timeoutId = setTimeout(animate, 30)
         } else {
-          // Переходим к следующему тексту или завершаем
-          if (currentTextIndex < textEndings.length - 1) {
-            timeoutId = setTimeout(() => {
-              setCurrentTextIndex((prev) => prev + 1)
-            }, 300)
-          } else {
-            // Анимация завершена, показываем ПОСЛЕДНИЙ вариант
-            setDisplayedText(baseText + textEndings[textEndings.length - 1])
-            setAnimationComplete(true)
-          }
+          // Переходим к следующему тексту
+          timeoutId = setTimeout(() => {
+            setCurrentTextIndex((prev) => prev + 1)
+          }, 200)
         }
       }
     }
@@ -128,10 +128,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden bg-black">
-      {/* Градиенты только снизу */}
+    <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden bg-black onboarding-screen-fade">
+      {/* Градиент снизу - половина экрана */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="openai-gradient-bottom" />
+        <div className="vibrant-gradient-bottom" />
       </div>
 
       {/* Контент */}

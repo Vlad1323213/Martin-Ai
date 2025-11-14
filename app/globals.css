@@ -405,48 +405,60 @@ div[class*="overflow"]::-webkit-scrollbar,
   animation: chatgpt-dot-fade 1.4s ease-in-out infinite;
 }
 
-/* Красивый волнистый градиент снизу (не касается логотипа) */
-.openai-gradient-bottom {
+/* Четкий яркий градиент как на фото - половина экрана снизу */
+.vibrant-gradient-bottom {
   position: absolute;
-  bottom: -40%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120%;
-  max-width: 1000px;
-  height: 500px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50vh;
   background: 
-    radial-gradient(
-      ellipse 600px 400px at 30% 50%,
-      rgba(125, 211, 192, 0.15) 0%,
-      rgba(125, 211, 192, 0.08) 30%,
-      transparent 60%
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(14, 165, 233, 0.4) 20%,
+      rgba(125, 211, 192, 0.5) 35%,
+      rgba(251, 191, 36, 0.45) 55%,
+      rgba(251, 146, 60, 0.5) 70%,
+      rgba(239, 68, 68, 0.4) 85%,
+      rgba(220, 38, 38, 0.35) 100%
     ),
     radial-gradient(
-      ellipse 500px 350px at 70% 60%,
-      rgba(251, 191, 36, 0.12) 0%,
-      rgba(251, 146, 60, 0.08) 35%,
-      transparent 60%
+      ellipse at 30% 80%,
+      rgba(125, 211, 192, 0.6) 0%,
+      transparent 50%
     ),
     radial-gradient(
-      ellipse 400px 300px at 50% 70%,
-      rgba(236, 72, 153, 0.1) 0%,
-      rgba(168, 85, 247, 0.06) 40%,
-      transparent 65%
+      ellipse at 70% 90%,
+      rgba(251, 191, 36, 0.5) 0%,
+      transparent 50%
     );
-  filter: blur(90px);
-  animation: float-gradient-wave 20s ease-in-out infinite;
+  filter: blur(40px);
+  animation: float-gradient-smooth 15s ease-in-out infinite;
   mix-blend-mode: screen;
+  opacity: 0.9;
 }
 
-@keyframes float-gradient-wave {
+@keyframes float-gradient-smooth {
   0%, 100% {
-    transform: translateX(-50%) translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) scale(1);
   }
-  33% {
-    transform: translateX(-45%) translateY(-30px) scale(1.1) rotate(5deg);
+  50% {
+    transform: translateY(-20px) scale(1.05);
   }
-  66% {
-    transform: translateX(-55%) translateY(-15px) scale(1.05) rotate(-5deg);
+}
+
+/* Плавное появление всего онбординга */
+.onboarding-screen-fade {
+  animation: screen-fade-in 1s ease-out;
+}
+
+@keyframes screen-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
