@@ -43,7 +43,7 @@ if (typeof window !== 'undefined' && !window.Telegram) {
       initData: '',
       initDataUnsafe: {
         user: {
-          id: 123456789,
+          id: 595256214,
           first_name: 'Test',
           last_name: 'User',
           username: 'testuser',
