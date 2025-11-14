@@ -405,37 +405,7 @@ div[class*="overflow"]::-webkit-scrollbar,
   animation: chatgpt-dot-fade 1.4s ease-in-out infinite;
 }
 
-/* Анимированный фон из изображения */
-.vibrant-gradient-bottom {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/photo_2025-11-14_14-02-51.jpg');
-  background-size: 110%;
-  background-position: center;
-  background-repeat: no-repeat;
-  animation: ken-burns-effect 25s ease-in-out infinite;
-}
-
-@keyframes ken-burns-effect {
-  0%, 100% {
-    transform: scale(1) translate(0, 0);
-    background-position: center center;
-  }
-  25% {
-    transform: scale(1.08) translate(-1%, -1%);
-    background-position: 48% 48%;
-  }
-  50% {
-    transform: scale(1.1) translate(0, 0);
-    background-position: center center;
-  }
-  75% {
-    transform: scale(1.08) translate(1%, 1%);
-    background-position: 52% 52%;
-  }
-}
+/* Видео фон - больше не нужны CSS правила, так как используется video элемент */
 
 @keyframes gradient-flow {
   0%, 100% {

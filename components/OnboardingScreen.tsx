@@ -138,9 +138,17 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden bg-black onboarding-screen-fade">
-      {/* Градиент снизу - половина экрана */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="vibrant-gradient-bottom" />
+      {/* Видео фон */}
+      <div className="absolute inset-0 overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/video_2025-11-14_15-19-04.mp4" type="video/mp4" />
+        </video>
       </div>
 
       {/* Контент */}
