@@ -10,6 +10,7 @@ import Header from '@/components/Header'
 import TypingIndicator from '@/components/TypingIndicator'
 import Drawer from '@/components/Drawer'
 import SettingsModal from '@/components/SettingsModal'
+import OnboardingScreen from '@/components/OnboardingScreen'
 import { useTelegram } from '@/hooks/useTelegram'
 import { parseCommand, generateResponse } from '@/lib/ai-parser'
 import { getTokens } from '@/lib/oauth'
@@ -58,8 +59,37 @@ export default function Home() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [checkingConnection, setCheckingConnection] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { webApp, user } = useTelegram()
+
+  // Проверяем подключение Google при загрузке
+  useEffect(() => {
+    const checkGoogleConnection = async () => {
+      if (!user) {
+        setCheckingConnection(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
+        const data = await response.json()
+        
+        if (!data.connected) {
+          setShowOnboarding(true)
+        }
+      } catch (error) {
+        console.error('Error checking Google connection:', error)
+      } finally {
+        setCheckingConnection(false)
+      }
+    }
+
+    if (user) {
+      checkGoogleConnection()
+    }
+  }, [user])
 
   // Обработка OAuth redirect для Telegram Mini App
   useEffect(() => {
@@ -274,6 +304,20 @@ export default function Home() {
 
   const handleOpenCalendar = () => {
     router.push('/calendar')
+  }
+
+  // Показываем onboarding если Google не подключен
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
+  }
+
+  // Показываем загрузку пока проверяем
+  if (checkingConnection) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <div className="text-white">Загрузка...</div>
+      </div>
+    )
   }
 
   return (
