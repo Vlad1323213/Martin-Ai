@@ -13,31 +13,31 @@ export default function EmailCardInline({ email, onClick }: EmailCardInlineProps
     <div
       onClick={onClick}
       className={`
-        bg-white/[0.02] border border-white/[0.08] rounded-xl p-3 mb-2
-        hover:bg-white/[0.04] active:bg-white/[0.06] 
-        transition-all cursor-pointer
-        ${email.unread ? 'border-[#007aff]/30' : ''}
+        bg-white border border-gray-200 rounded-xl p-3 mb-2
+        hover:bg-gray-50 active:bg-gray-100 
+        transition-all cursor-pointer shadow-sm hover:shadow-md
+        ${email.unread ? 'border-blue-200 bg-blue-50' : ''}
       `}
     >
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {email.unread && (
-            <div className="flex-shrink-0 w-2 h-2 bg-[#007aff] rounded-full" />
+            <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full" />
           )}
-          <p className={`text-sm truncate ${email.unread ? 'text-white font-semibold' : 'text-white/80 font-medium'}`}>
+          <p className={`text-sm truncate ${email.unread ? 'text-gray-900 font-semibold' : 'text-gray-700 font-medium'}`}>
             {email.from}
           </p>
         </div>
-        <span className="text-xs text-telegram-secondary flex-shrink-0">
+        <span className="text-xs text-gray-500 flex-shrink-0">
           {getRelativeTime(email.timestamp)}
         </span>
       </div>
 
-      <h4 className={`text-[13px] mb-1 truncate ${email.unread ? 'text-white font-medium' : 'text-white/70'}`}>
+      <h4 className={`text-[13px] mb-1 truncate ${email.unread ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
         {email.subject}
       </h4>
 
-      <p className="text-xs text-telegram-secondary line-clamp-2">
+      <p className="text-xs text-gray-500 line-clamp-2">
         {email.preview}
       </p>
     </div>

@@ -4,7 +4,7 @@ import { Message } from '@/types'
 import { Avatar } from '@mui/material'
 import { Person } from '@mui/icons-material'
 import ActionCard from './ActionCard'
-import LogoStatic from './LogoStatic'
+import WLogo from './WLogo'
 import TypewriterText from './TypewriterText'
 import EmailListCard from './EmailListCard'
 import { useState, useEffect } from 'react'
@@ -45,7 +45,7 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
     <div className={`flex gap-2 sm:gap-3 mb-3 sm:mb-4 animate-slide-up ${!isAssistant ? 'justify-end' : ''}`}>
       {isAssistant && (
         <div className="flex-shrink-0 mt-0.5">
-          <LogoStatic size={36} />
+          <WLogo size={36} />
         </div>
       )}
       
@@ -54,10 +54,8 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
         <div
           className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl ${
             isAssistant
-              ? (isWelcomeMessage && showAnimation && !animationComplete)
-                ? 'ai-message-animated text-white'
-                : 'ai-message-bordered text-white'
-              : 'user-message-gradient text-white shadow-lg'
+              ? 'bg-gray-100 text-gray-900 border border-gray-200'
+              : 'bg-blue-500 text-white shadow-lg'
           }`}
         >
           <div className="text-[14px] sm:text-[15px] leading-relaxed whitespace-pre-wrap break-words">

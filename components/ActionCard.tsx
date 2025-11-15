@@ -48,11 +48,12 @@ export default function ActionCard({ action, onClick }: ActionCardProps) {
       onClick={onClick}
       className="cursor-pointer hover:bg-opacity-80 transition-all active:scale-98"
       sx={{
-        bgcolor: '#1c1c1e',
-        border: '1px solid #2c2c2e',
+        bgcolor: '#ffffff',
+        border: '1px solid #e5e7eb',
         '&:hover': {
-          bgcolor: '#252527',
+          bgcolor: '#f9fafb',
           transform: 'scale(1.01)',
+          borderColor: '#d1d5db',
         },
         '&:active': {
           transform: 'scale(0.98)',
@@ -66,7 +67,7 @@ export default function ActionCard({ action, onClick }: ActionCardProps) {
           <div
             className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex-shrink-0"
             style={{ 
-              backgroundColor: isGoogleIcon ? '#ffffff' : `${iconColor}20`,
+              backgroundColor: isGoogleIcon ? `${iconColor}15` : `${iconColor}15`,
               padding: isGoogleIcon ? '4px' : '0'
             }}
           >
@@ -78,11 +79,11 @@ export default function ActionCard({ action, onClick }: ActionCardProps) {
           </div>
           
           <div className="flex-1 min-w-0">
-            <h3 className="text-white font-medium text-[14px] sm:text-[15px] leading-tight mb-0.5">
+            <h3 className="text-gray-900 font-medium text-[14px] sm:text-[15px] leading-tight mb-0.5">
               {action.title}
             </h3>
             {action.subtitle && (
-              <p className="text-telegram-secondary text-[12px] sm:text-[13px] truncate">
+              <p className="text-gray-500 text-[12px] sm:text-[13px] truncate">
                 {action.subtitle}
               </p>
             )}

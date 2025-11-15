@@ -11,8 +11,8 @@ interface EmailListCardProps {
 export default function EmailListCard({ emails, onEmailClick }: EmailListCardProps) {
   if (emails.length === 0) {
     return (
-      <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-4 text-center">
-        <p className="text-telegram-secondary text-sm">Нет писем для отображения</p>
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
+        <p className="text-gray-500 text-sm">Нет писем для отображения</p>
       </div>
     )
   }
