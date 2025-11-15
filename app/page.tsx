@@ -320,7 +320,7 @@ export default function Home() {
 
   return (
     <div 
-      className="flex flex-col h-screen w-screen bg-black overflow-hidden"
+      className="flex flex-col h-screen w-screen bg-white overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
