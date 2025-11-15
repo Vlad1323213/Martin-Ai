@@ -140,7 +140,7 @@ export default function Drawer({ isOpen, onClose, onRefresh }: DrawerProps) {
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className={`fixed top-0 left-0 h-full w-[85vw] max-w-[400px] bg-[#0a0a0a] shadow-2xl z-50 transition-transform duration-300 ease-out ${
+        className={`fixed top-0 left-0 h-full w-[85vw] max-w-[400px] bg-white shadow-2xl z-50 transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
@@ -153,32 +153,32 @@ export default function Drawer({ isOpen, onClose, onRefresh }: DrawerProps) {
         onTouchEnd={handleTouchEnd}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <Email sx={{ color: '#007aff', fontSize: 24 }} />
-            <h2 className="text-white text-lg font-semibold">Почта</h2>
+            <Email sx={{ color: '#3b82f6', fontSize: 24 }} />
+            <h2 className="text-gray-900 text-lg font-semibold">Почта</h2>
           </div>
-          <IconButton onClick={onClose} sx={{ color: 'white', padding: '8px' }}>
+          <IconButton onClick={onClose} sx={{ color: '#1f2937', padding: '8px' }}>
             <Close sx={{ fontSize: 24 }} />
           </IconButton>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto h-[calc(100%-60px)] px-4 py-4">
+        <div className="overflow-y-auto h-[calc(100%-60px)] px-4 py-4 bg-gray-50">
           <div className="animate-fade-in">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-white text-sm font-medium mb-1">
+                <h3 className="text-gray-900 text-sm font-medium mb-1">
                   Входящие
                 </h3>
-                <p className="text-telegram-secondary text-xs">
+                <p className="text-gray-500 text-xs">
                   {emails.filter(e => e.unread).length} непрочитанных
                 </p>
               </div>
               <button
                 onClick={fetchEmails}
                 disabled={loading}
-                className="text-[#007aff] text-sm font-medium hover:opacity-80 transition-opacity"
+                className="text-blue-500 text-sm font-medium hover:text-blue-600 transition-colors"
               >
                 {loading ? 'Загрузка...' : 'Обновить'}
               </button>

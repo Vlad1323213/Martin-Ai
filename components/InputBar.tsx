@@ -12,7 +12,7 @@ interface InputBarProps {
 
 export default function InputBar({
   onSend,
-  placeholder = 'Написать Мартину',
+  placeholder = 'Написать Mortis',
   disabled = false,
 }: InputBarProps) {
   const [value, setValue] = useState('')
@@ -66,11 +66,11 @@ export default function InputBar({
   }
 
   return (
-    <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-telegram-bg">
+    <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white">
       <div className="flex-1">
         <div 
           key={mounted ? animationKey : undefined}
-          className={`flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 py-2 relative ${mounted && !isUserActive ? 'input-animated' : 'input-not-animated'}`}
+          className="flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 py-2 bg-gray-100 border border-gray-200 hover:border-gray-300 transition-all"
         >
           <InputBase
             value={value}
@@ -82,12 +82,12 @@ export default function InputBar({
             maxRows={3}
             fullWidth
             sx={{
-              color: 'white',
+              color: '#000000',
               fontSize: { xs: '14px', sm: '15px' },
               '& .MuiInputBase-input': {
                 padding: 0,
                 '&::placeholder': {
-                  color: '#8e8e93',
+                  color: '#9ca3af',
                   opacity: 1,
                 },
               },
@@ -100,7 +100,7 @@ export default function InputBar({
               disabled={disabled}
               size="small"
               sx={{
-                color: '#007aff',
+                color: '#3b82f6',
                 padding: '4px',
                 minWidth: 0,
               }}
@@ -111,7 +111,7 @@ export default function InputBar({
             <IconButton
               size="small"
               sx={{
-                color: '#8e8e93',
+                color: '#9ca3af',
                 padding: '4px',
                 minWidth: 0,
               }}

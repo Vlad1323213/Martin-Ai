@@ -127,9 +127,15 @@ export default function Home() {
   }, [webApp])
 
   useEffect(() => {
-    // Auto-scroll to bottom when new messages arrive
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isTyping])
+    // Auto-scroll to bottom when new messages arrive (only if user is at bottom)
+    const scrollContainer = document.querySelector('.overflow-y-auto')
+    if (scrollContainer) {
+      const isNearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100
+      if (isNearBottom || messages.length === 1) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    }
+  }, [messages])
 
   // Swipe gesture для открытия drawer
   const handleTouchStart = (e: React.TouchEvent) => {
