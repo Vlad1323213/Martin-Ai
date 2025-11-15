@@ -155,19 +155,19 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Логотип */}
         <div className="mb-8 relative onboarding-fade-in">
-          <WLogo size={64} />
+          <WLogo size={96} />
         </div>
 
         {/* Заголовок */}
         <h1 className="text-5xl font-bold text-white mb-3 text-center onboarding-fade-in" style={{ animationDelay: '0.4s' }}>
-          Привет, <span className="text-[#7dd3c0]">Martin</span>
+          Привет, <span className="text-[#7dd3c0]">Mortis</span>
         </h1>
 
         {/* Подзаголовок с анимацией печати и стирания */}
-        <div className="text-gray-400 text-center mb-16 text-base min-h-[24px] onboarding-fade-in" style={{ animationDelay: '0.8s' }}>
+        <div className="text-white text-center mb-16 text-base min-h-[24px] onboarding-fade-in" style={{ animationDelay: '0.8s' }}>
           {displayedText}
           {!animationComplete && (
-            <span className="inline-block w-0.5 h-4 bg-gray-400 ml-1 animate-pulse" />
+            <span className="inline-block w-0.5 h-4 bg-white ml-1 animate-pulse" />
           )}
         </div>
 
