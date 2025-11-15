@@ -155,7 +155,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Логотип */}
         <div className="mb-8 relative onboarding-fade-in">
-          <WLogo size={96} />
+          <WLogo size={84} />
         </div>
 
         {/* Заголовок */}
