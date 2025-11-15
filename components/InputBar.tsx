@@ -70,7 +70,7 @@ export default function InputBar({
       <div className="flex-1">
         <div 
           key={mounted ? animationKey : undefined}
-          className="flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 py-2 bg-gray-100 border border-gray-200 hover:border-gray-300 transition-all"
+          className={`flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-4 py-2 ${mounted && !isUserActive ? 'input-light-animated' : 'input-light-not-animated'}`}
         >
           <InputBase
             value={value}

@@ -305,48 +305,28 @@ div[class*="overflow"]::-webkit-scrollbar,
   border-radius: 16px;
 }
 
-/* Input field animation - Gemini-style beautiful appearance and glow */
-@keyframes border-glow-appear {
+/* Красивая градиентная анимация границы для светлого стиля */
+@keyframes light-border-flow {
   0% {
-    opacity: 0;
-    background-position: 0% 0%;
-  }
-  100% {
-    opacity: 1;
-    background-position: 200% 0%;
-  }
-}
-
-@keyframes border-glow-loop {
-  0%, 100% {
-    box-shadow: 
-      -2px 0 12px rgba(100, 150, 255, 0.6),
-      0 0 6px rgba(150, 180, 255, 0.4);
-  }
-  25% {
-    box-shadow: 
-      0 -2px 12px rgba(150, 180, 255, 0.6),
-      0 0 8px rgba(180, 200, 255, 0.5);
+    background-position: 0% 50%;
   }
   50% {
-    box-shadow: 
-      2px 0 12px rgba(180, 200, 255, 0.7),
-      0 0 10px rgba(200, 220, 255, 0.5);
+    background-position: 100% 50%;
   }
-  75% {
-    box-shadow: 
-      0 2px 12px rgba(150, 180, 255, 0.6),
-      0 0 8px rgba(180, 200, 255, 0.5);
+  100% {
+    background-position: 0% 50%;
   }
 }
 
-.input-animated {
+.input-light-animated {
   position: relative;
-  background: #1a1a1c;
+  background: #f3f4f6;
   overflow: visible;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
-.input-animated::before {
+.input-light-animated::before {
   content: '';
   position: absolute;
   inset: -2px;
@@ -354,36 +334,33 @@ div[class*="overflow"]::-webkit-scrollbar,
   padding: 2px;
   background: linear-gradient(
     90deg,
-    transparent 0%,
-    rgba(100, 150, 255, 0.4) 25%,
-    rgba(150, 180, 255, 0.6) 40%,
-    rgba(180, 200, 255, 0.7) 50%,
-    rgba(150, 180, 255, 0.6) 60%,
-    rgba(100, 150, 255, 0.4) 75%,
-    transparent 100%
+    rgba(59, 130, 246, 0.6) 0%,
+    rgba(125, 211, 192, 0.7) 25%,
+    rgba(251, 191, 36, 0.6) 50%,
+    rgba(251, 146, 60, 0.7) 75%,
+    rgba(59, 130, 246, 0.6) 100%
   );
-  background-size: 200% 100%;
+  background-size: 300% 100%;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  animation: border-glow-appear 1.5s ease-out forwards, border-glow-loop 4s ease-in-out 1.5s infinite;
+  animation: light-border-flow 4s ease-in-out infinite;
   z-index: 1;
 }
 
-.input-animated > * {
+.input-light-animated > * {
   position: relative;
   z-index: 2;
 }
 
-.input-not-animated {
-  background: #1a1a1c;
-  border: 1px solid transparent;
-  box-shadow: none;
+.input-light-not-animated {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   transition: all 0.6s ease-out;
 }
 
-.input-not-animated::before {
+.input-light-not-animated::before {
   content: none;
 }
 
