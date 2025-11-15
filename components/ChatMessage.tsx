@@ -1,12 +1,12 @@
 'use client'
 
 import { Message } from '@/types'
-import { Avatar } from '@mui/material'
-import { Person } from '@mui/icons-material'
 import ActionCard from './ActionCard'
 import WLogo from './WLogo'
 import TypewriterText from './TypewriterText'
 import EmailListCard from './EmailListCard'
+import TodoCard from './TodoCard'
+import EventCard from './EventCard'
 import { useState, useEffect } from 'react'
 
 interface ChatMessageProps {
@@ -49,7 +49,7 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
         </div>
       )}
       
-      <div className={`flex flex-col max-w-[82%] sm:max-w-[85%] ${!isAssistant ? 'items-end' : ''}`}>
+      <div className={`flex flex-col ${isAssistant ? 'max-w-[95%]' : 'max-w-[82%]'} sm:max-w-[85%] ${!isAssistant ? 'items-end' : ''}`}>
         {/* Message bubble */}
         <div
           className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl ${
@@ -90,22 +90,31 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
                 ))}
               </div>
             )}
-          </div>
 
-      {!isAssistant && (
-        <div className="flex-shrink-0 mt-0.5">
-          <div 
-            className="user-avatar-gradient flex items-center justify-center rounded-full"
-            style={{
-              width: '36px',
-              height: '36px',
-              boxShadow: '0 2px 8px rgba(255, 255, 255, 0.1)'
-            }}
-          >
-            <Person sx={{ fontSize: 20, color: 'white' }} />
+            {/* Todo card */}
+            {message.todos && message.todos.length > 0 && showActions && (
+              <div className="mt-2 sm:mt-3 w-full animate-fade-in">
+                <TodoCard 
+                  title={message.todoTitle || 'Pick up my package'}
+                  todos={message.todos}
+                />
+              </div>
+            )}
+
+            {/* Event card */}
+            {message.events && message.events.length > 0 && showActions && (
+              <div className="mt-2 sm:mt-3 w-full animate-fade-in">
+                {message.events.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    title={event.title}
+                    datetime={`${event.startTime.toLocaleDateString('ru-RU', { weekday: 'long' })} • ${event.startTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} - ${event.endTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`}
+                    location={event.location}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      )}
     </div>
   )
 }

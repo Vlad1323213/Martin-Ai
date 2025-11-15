@@ -6,6 +6,8 @@ export interface Message {
   actions?: ActionCard[]
   emails?: EmailItem[]
   events?: CalendarEvent[]
+  todos?: Array<{id: string, text: string, completed: boolean}>
+  todoTitle?: string
 }
 
 export interface ActionCard {

@@ -296,20 +296,82 @@ export default function Home() {
     setMessages((prev) => [...prev, response])
   }
 
-  const handleAddTodo = () => {
-    handleSendMessage('Добавь новую задачу')
+  const handleAddTodo = async () => {
+    // Добавляем сообщение пользователя
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: 'Добавь задачу: забрать посылку и заблокировать 21:00-22:00 для чтения в библиотеке',
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, userMessage])
+
+    // Показываем typing
+    setIsTyping(true)
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setIsTyping(false)
+
+    // AI добавляет to-do карточку и событие
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      type: 'assistant',
+      content: 'Я успешно добавил "Забрать посылку" в ваш список дел. Также заблокировал 21:00 - 22:00 для "Чтение в библиотеке" в вашем календаре. Если нужно что-то еще, дайте знать!',
+      timestamp: new Date(),
+      todos: [
+        { id: '1', text: 'Забрать посылку', completed: false }
+      ],
+      todoTitle: 'Забрать посылку',
+      events: [
+        {
+          id: '1',
+          title: 'Чтение в библиотеке',
+          startTime: new Date(new Date().setHours(21, 0, 0, 0)),
+          endTime: new Date(new Date().setHours(22, 0, 0, 0)),
+          location: 'Библиотека',
+        }
+      ]
+    }
+    setMessages((prev) => [...prev, assistantMessage])
   }
 
-  const handleListTodos = () => {
-    handleSendMessage('Покажи мой список дел')
+  const handleListTodos = async () => {
+    // Добавляем сообщение пользователя
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: 'Покажи мой список дел',
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, userMessage])
+
+    // Показываем typing
+    setIsTyping(true)
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setIsTyping(false)
+
+    // AI показывает список дел
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      type: 'assistant',
+      content: 'Вот ваш список дел:',
+      timestamp: new Date(),
+      todos: [
+        { id: '1', text: 'Проверить квартальные отчеты', completed: true },
+        { id: '2', text: 'Подготовить презентацию', completed: false },
+        { id: '3', text: 'Позвонить в страховую', completed: false },
+        { id: '4', text: 'Купить продукты', completed: false },
+      ],
+      todoTitle: 'Мои задачи на сегодня'
+    }
+    setMessages((prev) => [...prev, assistantMessage])
   }
 
   const handleRemindMe = () => {
     handleSendMessage('Установи напоминание')
   }
 
-  const handleOpenCalendar = () => {
-    router.push('/calendar')
+  const handleReminder = () => {
+    handleSendMessage('Установи напоминание')
   }
 
   // Показываем onboarding если Google не подключен
@@ -363,7 +425,7 @@ export default function Home() {
         <BottomBar
           onAddTodo={handleAddTodo}
           onListTodos={handleListTodos}
-          onCalendar={handleOpenCalendar}
+          onReminder={handleReminder}
         />
         <InputBar onSend={handleSendMessage} disabled={isTyping} />
       </div>
