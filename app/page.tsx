@@ -18,7 +18,7 @@ import { getTokens } from '@/lib/oauth'
 const initialMessage: Message = {
   id: '1',
   type: 'assistant',
-  content: "Привет! Я Мартин, ваш новый персональный AI-ассистент.\n\nЯ рад познакомиться и помочь вам! Выберите задачу для начала:",
+  content: "Привет! Я Mortis, ваш новый персональный AI-ассистент.\n\nЯ рад познакомиться и помочь вам! Выберите задачу для начала:",
   timestamp: new Date('2025-01-01T00:00:00Z'), // Фиксированная дата для избежания hydration error
   actions: [
     {

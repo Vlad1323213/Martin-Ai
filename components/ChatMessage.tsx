@@ -80,7 +80,7 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
 
             {/* Action cards */}
             {message.actions && message.actions.length > 0 && showActions && (
-              <div className="mt-2 sm:mt-3 space-y-2 w-full animate-fade-in">
+              <div className="mt-2 sm:mt-3 space-y-2 w-full max-w-full animate-fade-in">
                 {message.actions.map((action) => (
                   <ActionCard
                     key={action.id}

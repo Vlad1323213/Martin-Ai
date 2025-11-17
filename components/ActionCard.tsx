@@ -46,10 +46,11 @@ export default function ActionCard({ action, onClick }: ActionCardProps) {
   return (
     <Card
       onClick={onClick}
-      className="cursor-pointer hover:bg-opacity-80 transition-all active:scale-98"
+      className="cursor-pointer hover:bg-opacity-80 transition-all active:scale-98 w-full"
       sx={{
         bgcolor: '#ffffff',
         border: '1px solid #e5e7eb',
+        borderRadius: '16px',
         '&:hover': {
           bgcolor: '#f9fafb',
           transform: 'scale(1.01)',
