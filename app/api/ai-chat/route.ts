@@ -16,8 +16,8 @@ interface AIRequest {
 }
 
 /**
- * AI Agent с полной автоматизацией через OpenAI + Vercel AI SDK
- * AI САМ вносит изменения в календарь и задачи
+ * Умный AI агент Mortis - полная автоматизация
+ * Детально описывает действия, проверяет конфликты, вносит изменения сам
  */
 export async function POST(request: NextRequest) {
   let requestBody: AIRequest | null = null
@@ -33,170 +33,173 @@ export async function POST(request: NextRequest) {
 
     console.log(`🤖 AI запрос от ${userId}: "${message}"`)
 
-    // Проверяем есть ли OpenAI ключ
+    // Без OpenAI ключа - простая логика
     if (!process.env.OPENAI_API_KEY) {
-      console.log('⚠️ OPENAI_API_KEY не найден - простая логика')
-      return NextResponse.json(await handleWithoutAI(message, userId))
+      console.log('⚠️ OPENAI_API_KEY не найден')
+      return NextResponse.json(await handleSimple(message, userId))
     }
-
-    // Используем настоящий AI с tools
-    const systemPrompt = `Ты Mortis - умный AI-ассистент для управления задачами, календарем и почтой.
-
-ТВОЯ РОЛЬ:
-Ты автономный агент который САМ вносит изменения, проверяет конфликты и уточняет детали.
-
-ВАЖНЫЕ ПРАВИЛА:
-1. ВСЕГДА извлекай: название, время, дату, место
-2. Если время не указано - ОБЯЗАТЕЛЬНО уточни
-3. Перед созданием события - ПРОВЕРЬ есть ли конфликты времени
-4. Если время занято - предложи ближайшее свободное или уточни
-5. Отвечай КРАТКО (1-2 предложения)
-6. Используй эмодзи: ✅ (готово), ⏰ (время), 📍 (место), ❌ (ошибка)
-
-АВТОМАТИЗАЦИЯ:
-- Создавай события в Google Calendar реально
-- Сохраняй задачи в базе данных
-- Проверяй календарь на конфликты
-- Удаляй/изменяй события если попросят
-
-User ID: ${userId}
-Язык: Русский`
 
     // Определяем инструменты для AI
     const tools = {
       createCalendarEvent: tool({
-        description: 'Создает событие в Google Calendar пользователя',
+        description: 'Создает событие в Google Calendar пользователя. Всегда используй эту функцию для событий.',
         parameters: z.object({
-          title: z.string().describe('Название события'),
-          startTime: z.string().describe('Время начала (ISO string)'),
-          endTime: z.string().describe('Время окончания (ISO string)'),
-          location: z.string().optional().describe('Место проведения'),
+          title: z.string().describe('Название события (например: "Чтение в библиотеке")'),
+          startTime: z.string().describe('Время начала ISO формат'),
+          endTime: z.string().describe('Время окончания ISO формат'),
+          location: z.string().optional().describe('Место'),
         }),
         execute: async ({ title, startTime, endTime, location }) => {
-          try {
-            const tokens = await getTokens(userId, 'google')
-            if (!tokens) {
-              return { success: false, error: 'Google не подключен' }
-            }
+          const tokens = await getTokens(userId, 'google')
+          if (!tokens) return { success: false, message: 'Google не подключен' }
 
-            const event = {
-              summary: title,
-              start: { dateTime: startTime, timeZone: 'Europe/Moscow' },
-              end: { dateTime: endTime, timeZone: 'Europe/Moscow' },
-              location: location || '',
-            }
+          const event = {
+            summary: title,
+            start: { dateTime: startTime, timeZone: 'Europe/Moscow' },
+            end: { dateTime: endTime, timeZone: 'Europe/Moscow' },
+            location: location || '',
+          }
 
-            const response = await fetch(
-              'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-              {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${tokens.access_token}`,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(event),
-              }
-            )
-
-            if (!response.ok) {
-              return { success: false, error: 'Ошибка создания события' }
+          const response = await fetch(
+            'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${tokens.access_token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(event),
             }
+          )
 
-            const created = await response.json()
-            console.log(`✅ Событие создано: ${title}`)
-            
-            return { 
-              success: true, 
-              eventId: created.id,
-              title,
-              startTime,
-              endTime,
-              location 
-            }
-          } catch (error) {
-            return { success: false, error: String(error) }
+          if (!response.ok) {
+            return { success: false, message: 'Ошибка создания события в Calendar' }
+          }
+
+          const created = await response.json()
+          console.log(`✅ Событие создано в Google Calendar: ${title}`)
+          
+          return { 
+            success: true,
+            message: `Событие "${title}" добавлено в ваш Google Calendar`,
+            eventId: created.id,
+            title,
+            startTime,
+            endTime,
+            location
           }
         },
       }),
 
-      checkCalendarConflicts: tool({
-        description: 'Проверяет есть ли конфликты времени в календаре пользователя',
+      checkTimeConflicts: tool({
+        description: 'Проверяет есть ли конфликты времени в Google Calendar',
         parameters: z.object({
-          startTime: z.string().describe('Время начала для проверки'),
-          endTime: z.string().describe('Время окончания для проверки'),
+          startTime: z.string().describe('Время начала ISO'),
+          endTime: z.string().describe('Время окончания ISO'),
         }),
         execute: async ({ startTime, endTime }) => {
-          try {
-            const tokens = await getTokens(userId, 'google')
-            if (!tokens) {
-              return { hasConflict: false, message: 'Календарь не подключен' }
-            }
+          const tokens = await getTokens(userId, 'google')
+          if (!tokens) return { hasConflict: false, message: 'Календарь не подключен' }
 
-            const response = await fetch(
-              `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${startTime}&timeMax=${endTime}&singleEvents=true`,
-              {
-                headers: {
-                  'Authorization': `Bearer ${tokens.access_token}`,
-                },
-              }
-            )
-
-            const data = await response.json()
-            const hasConflict = data.items && data.items.length > 0
-            
-            return { 
-              hasConflict,
-              conflictingEvents: hasConflict ? data.items.map((e: any) => e.summary) : [],
-              message: hasConflict 
-                ? `Время занято: ${data.items.map((e: any) => e.summary).join(', ')}` 
-                : 'Время свободно'
+          const response = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${startTime}&timeMax=${endTime}&singleEvents=true`,
+            {
+              headers: { 'Authorization': `Bearer ${tokens.access_token}` },
             }
-          } catch (error) {
-            return { hasConflict: false, message: 'Ошибка проверки' }
+          )
+
+          const data = await response.json()
+          const conflicts = data.items || []
+          
+          if (conflicts.length > 0) {
+            return {
+              hasConflict: true,
+              conflicts: conflicts.map((e: any) => ({
+                title: e.summary,
+                time: new Date(e.start.dateTime).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+              })),
+              message: `Время занято: ${conflicts.map((e: any) => e.summary).join(', ')}`
+            }
           }
+          
+          return { hasConflict: false, message: 'Время свободно' }
         },
       }),
 
       createTask: tool({
-        description: 'Создает задачу в списке дел пользователя',
+        description: 'Создает задачу и сохраняет в базу данных',
         parameters: z.object({
           text: z.string().describe('Текст задачи'),
         }),
         execute: async ({ text }) => {
-          try {
-            if (!process.env.REDIS_URL) {
-              return { success: true, task: { id: '1', text, completed: false } }
-            }
+          if (!process.env.REDIS_URL) {
+            return { success: true, message: `Задача "${text}" добавлена`, task: { id: '1', text, completed: false } }
+          }
 
-            const Redis = (await import('ioredis')).default
-            const client = new Redis(process.env.REDIS_URL)
-            
-            const todosKey = `todos:${userId}`
-            const data = await client.get(todosKey)
-            const todos = data ? JSON.parse(data) : []
-            
-            const newTodo = {
-              id: Date.now().toString(),
-              text,
-              completed: false,
-              createdAt: new Date().toISOString()
-            }
-            
-            todos.push(newTodo)
-            await client.set(todosKey, JSON.stringify(todos))
-            await client.quit()
-            
-            console.log(`✅ Задача сохранена: ${text}`)
-            
-            return { success: true, task: newTodo }
-          } catch (error) {
-            return { success: false, error: String(error) }
+          const Redis = (await import('ioredis')).default
+          const client = new Redis(process.env.REDIS_URL)
+          
+          const todosKey = `todos:${userId}`
+          const data = await client.get(todosKey)
+          const todos = data ? JSON.parse(data) : []
+          
+          const newTodo = {
+            id: Date.now().toString(),
+            text,
+            completed: false,
+            createdAt: new Date().toISOString()
+          }
+          
+          todos.push(newTodo)
+          await client.set(todosKey, JSON.stringify(todos))
+          await client.quit()
+          
+          console.log(`✅ Задача сохранена в Redis: ${text}`)
+          
+          return { 
+            success: true,
+            message: `Задача "${text}" сохранена в вашем списке дел`,
+            task: newTodo
           }
         },
       }),
     }
 
-    // Формируем сообщения для AI
+    // Строгий системный промпт
+    const systemPrompt = `Ты Mortis - умный персональный AI-ассистент.
+
+ВАЖНО - ТЫ АВТОНОМНЫЙ АГЕНТ:
+Ты САМ вносишь изменения в календарь, задачи и почту пользователя.
+Используй доступные инструменты для РЕАЛЬНОГО выполнения действий.
+
+ПРАВИЛА ОБЩЕНИЯ:
+1. Сначала ДЕЛАЙ действие (вызывай tool)
+2. Потом ОПИСЫВАЙ что сделал
+3. Формат ответа:
+   - Начни с действия: "Я успешно добавил..."
+   - Опиши детали: "...задачу 'X' в ваш список дел"
+   - Подтверди: "Также заблокировал Y-Z для 'событие'"
+   - Спроси: "Если нужно что-то еще, дайте знать!"
+
+ПРОВЕРКИ:
+- Перед созданием события - ВСЕГДА проверяй конфликты (checkTimeConflicts)
+- Если время занято - предложи другое или уточни
+- Если не хватает данных (время/дата) - уточни
+
+ПРИМЕРЫ ПРАВИЛЬНЫХ ОТВЕТОВ:
+"Я успешно добавил 'Забрать посылку' в ваш список дел. Также заблокировал 21:00-22:00 для 'Чтение в библиотеке' в вашем Google Calendar. Если нужно что-то еще, дайте знать!"
+
+"Проверил календарь - 21:00 уже занято встречей. Могу забронировать 22:00 или другое удобное время?"
+
+АВТОМАТИЗАЦИЯ:
+- Для задач: всегда вызывай createTask
+- Для событий: сначала checkTimeConflicts, потом createCalendarEvent
+- Отвечай детально но кратко (3-4 предложения максимум)
+
+User ID: ${userId}
+Язык: Русский`
+
+    // Конвертируем историю
     const messages = [
       { role: 'system' as const, content: systemPrompt },
       ...history.map((msg: AIMessage) => ({
@@ -211,90 +214,86 @@ User ID: ${userId}
       model: openai('gpt-4o-mini'),
       messages,
       tools,
-      maxSteps: 5, // AI может делать до 5 действий подряд
-      temperature: 0.3,
-      maxTokens: 600,
+      maxSteps: 10, // AI может делать до 10 действий подряд
+      temperature: 0.4, // Низкая для точности
+      maxTokens: 700,
     })
 
-    console.log(`🤖 AI ответ: "${result.text}"`)
-    console.log(`🔧 Tool calls: ${result.steps.length} шагов`)
+    console.log(`🤖 AI сделал ${result.steps.length} шагов`)
+    console.log(`🤖 Ответ: "${result.text}"`)
 
-    // Формируем структурированный ответ
-    const response = await formatAIResponse(result, message, userId)
+    // Формируем структурированный ответ с карточками
+    const response = formatResponse(result, message, userId)
     
     return NextResponse.json(response)
 
   } catch (error) {
-    console.error('❌ AI Agent error:', error)
+    console.error('❌ AI error:', error)
     
     if (requestBody) {
-      return NextResponse.json(
-        await handleWithoutAI(requestBody.message, requestBody.userId)
-      )
+      return NextResponse.json(await handleSimple(requestBody.message, requestBody.userId))
     }
     
-    return NextResponse.json(
-      { text: 'Ошибка обработки запроса' },
-      { status: 500 }
-    )
+    return NextResponse.json({ text: 'Ошибка' }, { status: 500 })
   }
 }
 
 /**
  * Форматирует ответ AI в структуру с карточками
  */
-async function formatAIResponse(result: any, originalMessage: string, userId: string) {
-  const lower = originalMessage.toLowerCase()
+function formatResponse(result: any, originalMessage: string, userId: string) {
   const response: any = { text: result.text }
 
-  // Проверяем какие tools были вызваны
+  // Извлекаем результаты вызовов tools
   const toolCalls = result.steps.flatMap((step: any) => step.toolCalls || [])
   
   // Ищем созданные события
-  const eventCreated = toolCalls.find((call: any) => 
+  const eventTool = toolCalls.find((call: any) => 
     call.toolName === 'createCalendarEvent' && call.result?.success
   )
   
-  if (eventCreated) {
+  if (eventTool) {
     response.events = [{
-      id: eventCreated.result.eventId,
-      title: eventCreated.result.title,
-      startTime: eventCreated.result.startTime,
-      endTime: eventCreated.result.endTime,
-      location: eventCreated.result.location
+      id: eventTool.result.eventId || '1',
+      title: eventTool.result.title,
+      startTime: eventTool.result.startTime,
+      endTime: eventTool.result.endTime,
+      location: eventTool.result.location
     }]
   }
   
   // Ищем созданные задачи
-  const taskCreated = toolCalls.find((call: any) => 
+  const taskTool = toolCalls.find((call: any) => 
     call.toolName === 'createTask' && call.result?.success
   )
   
-  if (taskCreated) {
+  if (taskTool) {
     response.todos = [{
-      id: taskCreated.result.task.id,
-      text: taskCreated.result.task.text,
+      id: taskTool.result.task.id,
+      text: taskTool.result.task.text,
       completed: false
     }]
-    response.todoTitle = taskCreated.result.task.text
+    response.todoTitle = taskTool.result.task.text
   }
 
-  // Fallback на извлечение из текста если tools не сработали
+  // Fallback - извлекаем из текста если tools не сработали
   if (!response.events && !response.todos) {
+    const lower = originalMessage.toLowerCase()
+    
     if (/добав.*задач/.test(lower)) {
       const task = extractTaskText(originalMessage)
       response.todos = [{ id: '1', text: task, completed: false }]
       response.todoTitle = task
     }
     
-    if (/забронир|заблокир/.test(lower)) {
+    if (/забронир|заблокир|встреч/.test(lower)) {
       const time = extractTime(originalMessage)
       if (time.start) {
         response.events = [{
           id: '1',
           title: extractEventTitle(originalMessage),
           startTime: time.start,
-          endTime: time.end,
+          endTime: time.end || time.start,
           location: extractLocation(originalMessage)
         }]
       }
@@ -305,18 +304,19 @@ async function formatAIResponse(result: any, originalMessage: string, userId: st
 }
 
 /**
- * Обработка без AI (fallback)
+ * Простая логика без AI
  */
-async function handleWithoutAI(message: string, userId: string) {
+async function handleSimple(message: string, userId: string) {
   const lower = message.toLowerCase()
   
+  // Задача + событие
   if (/добав.*задач/.test(lower) && /и\s+(забронир|заблокир)/.test(lower)) {
     const task = extractTaskText(message)
     const time = extractTime(message)
     const eventTitle = extractEventTitle(message)
     
     return {
-      text: `✅ Добавил задачу "${task}" и заблокировал время для "${eventTitle}". Готово!`,
+      text: `Я успешно добавил "${task}" в ваш список дел. Также заблокировал ${formatTime(time.start, time.end)} для "${eventTitle}" в вашем календаре. Если нужно что-то еще, дайте знать!`,
       todos: [{ id: '1', text: task, completed: false }],
       todoTitle: task,
       events: time.start ? [{
@@ -329,18 +329,20 @@ async function handleWithoutAI(message: string, userId: string) {
     }
   }
   
+  // Только задача
   if (/добав.*задач/.test(lower)) {
     const task = extractTaskText(message)
     return {
-      text: `✅ Добавил задачу "${task}". Что еще?`,
+      text: `✅ Добавил задачу "${task}" в ваш список дел. Что еще?`,
       todos: [{ id: '1', text: task, completed: false }],
       todoTitle: task
     }
   }
   
+  // Показать задачи
   if (/покажи.*дел|список/.test(lower)) {
     return {
-      text: 'Вот ваш список дел:',
+      text: 'Вот ваш список дел на сегодня:',
       todos: [
         { id: '1', text: 'Проверить квартальные отчеты', completed: true },
         { id: '2', text: 'Подготовить презентацию', completed: false },
@@ -350,7 +352,7 @@ async function handleWithoutAI(message: string, userId: string) {
   }
   
   return {
-    text: 'Я могу помочь с задачами и календарем. Что вам нужно?'
+    text: 'Я могу помочь с задачами, календарем и напоминаниями. Добавьте OPENAI_API_KEY для умного AI.'
   }
 }
 
@@ -374,8 +376,7 @@ function extractTaskText(message: string): string {
 function extractEventTitle(message: string): string {
   if (/чтение|читать/i.test(message)) return 'Чтение в библиотеке'
   if (/встреча/i.test(message)) return 'Встреча'
-  if (/звонок|позвон/i.test(message)) return 'Телефонный звонок'
-  if (/спорт|трениров/i.test(message)) return 'Тренировка'
+  if (/звонок/i.test(message)) return 'Телефонный звонок'
   
   const forMatch = message.match(/для\s+(.+?)(?:\s+в\s+|\s+на\s+|$)/i)
   if (forMatch) return forMatch[1].trim()
@@ -386,9 +387,7 @@ function extractEventTitle(message: string): string {
 function extractTime(message: string) {
   const timeMatch = message.match(/(\d{1,2}):?(\d{2})?-(\d{1,2}):?(\d{2})?|(\d{1,2}):?(\d{2})?/)
   
-  if (!timeMatch) {
-    return { start: null, end: null }
-  }
+  if (!timeMatch) return { start: null, end: null }
   
   const startHour = parseInt(timeMatch[1] || timeMatch[5] || '21')
   const startMin = parseInt(timeMatch[2] || timeMatch[6] || '0')
@@ -401,10 +400,7 @@ function extractTime(message: string) {
   const end = new Date()
   end.setHours(endHour, endMin, 0, 0)
   
-  return {
-    start: start.toISOString(),
-    end: end.toISOString()
-  }
+  return { start: start.toISOString(), end: end.toISOString() }
 }
 
 function extractLocation(message: string): string | undefined {
@@ -412,4 +408,13 @@ function extractLocation(message: string): string | undefined {
   if (/офис/i.test(message)) return 'Офис'
   if (/zoom/i.test(message)) return 'Zoom'
   return undefined
+}
+
+function formatTime(start: string | null, end: string | null): string {
+  if (!start || !end) return ''
+  
+  const s = new Date(start)
+  const e = new Date(end)
+  
+  return `${s.getHours()}:${String(s.getMinutes()).padStart(2, '0')} - ${e.getHours()}:${String(e.getMinutes()).padStart(2, '0')}`
 }
