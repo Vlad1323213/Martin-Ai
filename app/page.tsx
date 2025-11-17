@@ -15,41 +15,13 @@ import { useTelegram } from '@/hooks/useTelegram'
 import { parseCommand, generateResponse } from '@/lib/ai-parser'
 import { getTokens } from '@/lib/oauth'
 
+// Динамическое начальное сообщение создается в компоненте
 const initialMessage: Message = {
   id: '1',
   type: 'assistant',
-  content: "Привет! Я Mortis, ваш новый персональный AI-ассистент.\n\nЯ рад познакомиться и помочь вам! Выберите задачу для начала:",
-  timestamp: new Date('2025-01-01T00:00:00Z'), // Фиксированная дата для избежания hydration error
-  actions: [
-    {
-      id: 'integrate',
-      title: 'Подключить Gmail и Google Calendar',
-      subtitle: 'Интеграция с вашими аккаунтами',
-      icon: 'integrate',
-      type: 'integrate',
-    },
-    {
-      id: 'calendar',
-      title: 'Посмотреть календарь на эту неделю',
-      subtitle: 'Google Calendar',
-      icon: 'calendar',
-      type: 'calendar',
-    },
-    {
-      id: 'email',
-      title: 'Проверить непрочитанные письма',
-      subtitle: 'Gmail',
-      icon: 'email',
-      type: 'email',
-    },
-    {
-      id: 'todo',
-      title: 'Создать список дел на завтра',
-      subtitle: 'Планирование задач',
-      icon: 'todo',
-      type: 'todo',
-    },
-  ],
+  content: "Привет! Я Mortis, ваш новый персональный AI-ассистент.\n\nЯ рад познакомиться и помочь вам! Что вас интересует?",
+  timestamp: new Date('2025-01-01T00:00:00Z'),
+  actions: [], // Заполнится динамически
 }
 
 export default function Home() {
@@ -64,7 +36,7 @@ export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { webApp, user } = useTelegram()
 
-  // Проверяем подключение Google при загрузке
+  // Проверяем подключение Google и формируем actions
   useEffect(() => {
     const checkGoogleConnection = async () => {
       if (!user) {
@@ -78,6 +50,29 @@ export default function Home() {
         
         if (!data.connected) {
           setShowOnboarding(true)
+        } else {
+          // Если подключен - формируем actions БЕЗ integrate
+          const welcomeActions = [
+            {
+              id: 'email',
+              title: 'Проверить непрочитанные письма',
+              subtitle: 'Gmail',
+              icon: 'email' as const,
+              type: 'email' as const,
+            },
+            {
+              id: 'todo',
+              title: 'Создать список дел',
+              subtitle: 'Планирование задач',
+              icon: 'todo' as const,
+              type: 'todo' as const,
+            },
+          ]
+          
+          setMessages([{
+            ...initialMessage,
+            actions: welcomeActions
+          }])
         }
       } catch (error) {
         console.error('Error checking Google connection:', error)
@@ -265,9 +260,9 @@ export default function Home() {
       return
     }
 
-    // Специальная обработка для календаря - сразу открываем страницу
+    // Календарь через чат (не переход на страницу)
     if (action.type === 'calendar') {
-      router.push('/calendar')
+      handleSendMessage('Покажи мои события на эту неделю')
       return
     }
 

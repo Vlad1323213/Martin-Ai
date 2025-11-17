@@ -5,6 +5,7 @@ import ActionCard from './ActionCard'
 import WLogo from './WLogo'
 import TypewriterText from './TypewriterText'
 import EmailListCard from './EmailListCard'
+import EmailDraftCard from './EmailDraftCard'
 import TodoCard from './TodoCard'
 import EventCard from './EventCard'
 import { useState, useEffect } from 'react'
@@ -112,6 +113,17 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
                     location={event.location}
                   />
                 ))}
+              </div>
+            )}
+
+            {/* Email draft card */}
+            {message.emailDraft && showActions && (
+              <div className="mt-2 sm:mt-3 w-full animate-fade-in">
+                <EmailDraftCard
+                  to={message.emailDraft.to}
+                  subject={message.emailDraft.subject}
+                  body={message.emailDraft.body}
+                />
               </div>
             )}
           </div>
