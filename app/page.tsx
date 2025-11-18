@@ -10,6 +10,7 @@ import Header from '@/components/Header'
 import TypingIndicator from '@/components/TypingIndicator'
 import SettingsModal from '@/components/SettingsModal'
 import OnboardingScreen from '@/components/OnboardingScreen'
+import NotificationDrawer from '@/components/NotificationDrawer'
 import { useTelegram } from '@/hooks/useTelegram'
 import { parseCommand, generateResponse } from '@/lib/ai-parser'
 import { getTokens } from '@/lib/oauth'
@@ -28,6 +29,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([initialMessage])
   const [isTyping, setIsTyping] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -367,8 +369,14 @@ export default function Home() {
         onClose={() => setIsSettingsOpen(false)} 
       />
 
+      {/* Notifications Drawer */}
+      <NotificationDrawer
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+      />
+
       <Header 
-        onSettingsClick={() => setIsSettingsOpen(true)}
+        onNotificationClick={() => setIsNotificationsOpen(true)}
       />
 
       {/* Chat area */}
