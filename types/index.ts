@@ -9,7 +9,6 @@ export interface Message {
   todos?: Array<{id: string, text: string, completed: boolean}>
   todoTitle?: string
   emailDraft?: {to: string, subject: string, body: string}
-  sms?: {to: string, body: string}
 }
 
 export interface ActionCard {

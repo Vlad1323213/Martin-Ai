@@ -254,25 +254,6 @@ export async function POST(request: NextRequest) {
         },
       }),
 
-      generateSms: tool({
-        description: 'Создает черновик SMS/текстового сообщения',
-        parameters: z.object({
-          to: z.string().describe('Номер или имя получателя'),
-          body: z.string().describe('Текст сообщения'),
-        }),
-        execute: async ({ to, body }) => {
-          console.log(`📱 Создаю SMS для ${to}`)
-          
-          return {
-            success: true,
-            sms: {
-              to,
-              body
-            },
-            message: `SMS черновик готов для ${to}`
-          }
-        },
-      }),
     }
 
     // Детальный промпт для умного агента
@@ -286,11 +267,10 @@ export async function POST(request: NextRequest) {
 1. readEmails - читай и анализируй письма
 2. generateEmailDraft - создавай черновики ответов 
 3. sendEmail - отправляй готовые письма
-4. generateSms - создавай SMS черновики
 
 ПРИМЕРЫ РАБОТЫ С ПОЧТОЙ:
 "Найди письмо от мамы о рейсе" → readEmails(query: "from:mom flight") → анализируешь → извлекаешь информацию
-"Отправь маме SMS с информацией" → generateSms → возвращаешь карточку SMS
+"Ответь маме на почту" → generateEmailDraft → возвращаешь карточку письма
 "Переслать Итану на почту" → generateEmailDraft → возвращаешь карточку письма
 
 УМНАЯ ФИЛЬТРАЦИЯ:
@@ -305,8 +285,8 @@ export async function POST(request: NextRequest) {
 
 ФОРМАТ ОТВЕТА:
 "Нашел письмо от мамы с информацией о рейсах.
-Создал SMS с деталями полета для отправки маме.
-Подготовил email для Итана с той же информацией."
+Извлек детали: рейс UA854, 12 ноября, Houston-Lima.
+Подготовил email для пересылки Итану с информацией о рейсе."
 
 ВАЖНО:
 - НЕ показывай сырые списки писем
@@ -407,18 +387,6 @@ function formatResponse(result: any, originalMessage: string, userId: string) {
     }
   }
 
-  // Ищем SMS черновики
-  const smsTool = toolCalls.find((call: any) => 
-    call.toolName === 'generateSms' && call.result?.success
-  )
-  
-  if (smsTool) {
-    response.sms = {
-      to: smsTool.result.sms.to,
-      body: smsTool.result.sms.body
-    }
-  }
-
   // Ищем прочитанные письма (для анализа, но не для отображения списка)
   const readEmailsTool = toolCalls.find((call: any) => 
     call.toolName === 'readEmails' && call.result?.success
@@ -431,7 +399,7 @@ function formatResponse(result: any, originalMessage: string, userId: string) {
   }
 
   // Fallback - извлекаем из текста если tools не сработали
-  if (!response.events && !response.todos && !response.emailDraft && !response.sms) {
+  if (!response.events && !response.todos && !response.emailDraft) {
     const lower = originalMessage.toLowerCase()
     
     if (/добав.*задач/.test(lower)) {
