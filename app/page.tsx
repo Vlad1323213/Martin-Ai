@@ -190,38 +190,7 @@ export default function Home() {
       }
 
       // Handle AI commands
-      if (command.type === 'check_email') {
-        if (!user) {
-          assistantMessage.content = 'Ошибка: не удалось получить ID пользователя'
-          setMessages((prev) => [...prev, assistantMessage])
-          setIsTyping(false)
-          return
-        }
-        
-        // Получаем токены с сервера
-        const tokensResponse = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
-        const tokensData = await tokensResponse.json()
-        
-        if (!tokensData.connected) {
-          assistantMessage.content = 'Пожалуйста, подключите Gmail в настройках, чтобы я мог проверить вашу почту.'
-          setMessages((prev) => [...prev, assistantMessage])
-          setIsTyping(false)
-          return
-        }
-        
-        const tokens = tokensData.tokens
-        // Fetch real emails
-        const unreadParam = command.params?.unreadOnly ? '&unreadOnly=true' : ''
-        const response = await fetch(`/api/emails?accessToken=${tokens.access_token}&maxResults=5${unreadParam}`)
-        const data = await response.json()
-        
-        if (data.emails && data.emails.length > 0) {
-          assistantMessage.content = generateResponse(command, data)
-          assistantMessage.emails = data.emails
-        } else {
-          assistantMessage.content = 'У вас нет новых писем.'
-        }
-      } else if (command.type === 'check_calendar') {
+      if (command.type === 'check_calendar') {
         if (!user) {
           assistantMessage.content = 'Ошибка: не удалось получить ID пользователя'
           setMessages((prev) => [...prev, assistantMessage])
