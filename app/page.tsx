@@ -14,6 +14,7 @@ import NotificationDrawer from '@/components/NotificationDrawer'
 import { useTelegram } from '@/hooks/useTelegram'
 import { parseCommand, generateResponse } from '@/lib/ai-parser'
 import { getTokens } from '@/lib/oauth'
+import { addNotification } from '@/lib/notifications'
 
 // Динамическое начальное сообщение создается в компоненте
 const initialMessage: Message = {
@@ -211,8 +212,39 @@ export default function Home() {
           setTimeout(() => router.push('/calendar'), 1000)
         }
       } else {
-        // Default AI response
-        assistantMessage.content = getAIResponse(content)
+        // Default AI response - теперь с поддержкой почты
+        const response = await sendToAI(content, user?.id || 'default')
+        
+        // Создаем уведомления для действий AI
+        if (response.todos?.length) {
+          addNotification(
+            'task',
+            'Задача добавлена',
+            `Добавлена задача: "${response.todoTitle || response.todos[0].text}"`
+          )
+        }
+        
+        if (response.events?.length) {
+          addNotification(
+            'event',
+            'Событие создано',
+            `Добавлено событие: "${response.events[0].title}"`
+          )
+        }
+        
+        if (response.emailDraft) {
+          addNotification(
+            'email',
+            'Черновик письма',
+            `Подготовлен черновик для ${response.emailDraft.to}`
+          )
+        }
+        
+        assistantMessage.content = response.text || getAIResponse(content)
+        assistantMessage.todos = response.todos
+        assistantMessage.todoTitle = response.todoTitle
+        assistantMessage.events = response.events
+        assistantMessage.emailDraft = response.emailDraft
       }
 
       setMessages((prev) => [...prev, assistantMessage])
@@ -407,6 +439,26 @@ export default function Home() {
 }
 
 // Helper functions for AI responses
+async function sendToAI(message: string, userId: string) {
+  try {
+    const response = await fetch('/api/ai-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, userId })
+    })
+    
+    if (!response.ok) {
+      throw new Error('AI request failed')
+    }
+    
+    return await response.json()
+  } catch (error) {
+    console.error('AI Error:', error)
+    // Fallback to simple logic
+    return { text: getAIResponse(message) }
+  }
+}
+
 function getAIResponse(input: string): string {
   const lowerInput = input.toLowerCase()
 

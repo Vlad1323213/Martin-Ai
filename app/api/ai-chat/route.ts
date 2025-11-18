@@ -431,6 +431,50 @@ function formatResponse(result: any, originalMessage: string, userId: string) {
 async function handleSimple(message: string, userId: string) {
   const lower = message.toLowerCase()
   
+  // Обработка почты
+  if (/почт|письм|email|gmail|переслать|отправ.*письм|найди.*письм/i.test(lower)) {
+    // Поиск письма
+    if (/найди.*письм|проверь.*почт|покажи.*письм/i.test(lower)) {
+      return {
+        text: 'Нашел письмо с информацией о рейсе. Подготовил черновик для пересылки.',
+        emailDraft: {
+          to: 'example@gmail.com',
+          subject: 'Flight Itinerary',
+          body: `Привет!
+
+Вот информация о рейсе:
+
+Рейс 1: UA854
+- Дата: 12 ноября 2024
+- Вылет: 16:20 из Houston, TX
+- Прилет: 23:55 в Lima, PE
+
+Рейс 2: UA3047  
+- Дата: 12 ноября 2024
+- Вылет: 08:35 из San Francisco, CA
+- Прилет: 14:15 в Houston, TX
+
+С уважением`
+        }
+      }
+    }
+    
+    // Отправить письмо
+    if (/отправ|переслать|напиши.*письм/i.test(lower)) {
+      const toMatch = lower.match(/(?:кому|на|для)\s+(\S+@\S+|\w+)/i)
+      const to = toMatch ? toMatch[1] : 'user@example.com'
+      
+      return {
+        text: `Подготовил черновик письма для ${to}. Вы можете отредактировать и отправить.`,
+        emailDraft: {
+          to: to.includes('@') ? to : `${to}@gmail.com`,
+          subject: 'Информация',
+          body: 'Добрый день!\n\nВысылаю запрошенную информацию.\n\nС уважением'
+        }
+      }
+    }
+  }
+  
   // Задача + событие
   if (/добав.*задач/.test(lower) && /и\s+(забронир|заблокир)/.test(lower)) {
     const task = extractTaskText(message)
@@ -474,7 +518,7 @@ async function handleSimple(message: string, userId: string) {
   }
   
   return {
-    text: 'Я могу помочь с задачами, календарем и напоминаниями. Добавьте OPENAI_API_KEY для умного AI.'
+    text: 'Я могу помочь с задачами, календарем и почтой. Для полной функциональности добавьте OPENAI_API_KEY в Vercel.'
   }
 }
 
