@@ -15,6 +15,7 @@
     "@mui/icons-material": "^5.14.19",
     "@mui/material": "^5.14.20",
     "ai": "^3.4.7",
+    "googleapis": "^166.0.0",
     "ioredis": "^5.3.2",
     "next": "^15.0.3",
     "react": "^19.0.0",
@@ -33,4 +34,3 @@
     "typescript": "^5"
   }
 }
-
