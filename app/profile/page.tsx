@@ -307,11 +307,11 @@ export default function ProfilePage() {
                 </div>
                 
                 <button
-                  onClick={handleGoogleLogin}
-                  className="w-full py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all active:scale-98 flex items-center justify-center gap-2"
+                  onClick={() => router.push('/settings')}
+                  className="w-full py-2.5 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all active:scale-98 flex items-center justify-center gap-2"
                 >
                   <Login sx={{ fontSize: 18 }} />
-                  Войти в Google
+                  Подключить Google
                 </button>
               </div>
             )}
@@ -357,9 +357,9 @@ export default function ProfilePage() {
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    item.type === 'pro' ? 'bg-gradient-to-br from-blue-100 to-purple-100' : 'bg-gray-100'
+                    item.type === 'pro' ? 'bg-black' : 'bg-gray-100'
                   }`}>
-                    <div className={item.type === 'pro' ? 'text-blue-600' : 'text-gray-600'}>
+                    <div className={item.type === 'pro' ? 'text-white' : 'text-gray-600'}>
                       {item.icon}
                     </div>
                   </div>
@@ -369,7 +369,7 @@ export default function ProfilePage() {
                   {item.value && (
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       item.type === 'pro' 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
+                        ? 'bg-black text-white' 
                         : 'bg-gray-100 text-gray-600'
                     }`}>
                       {item.value}
@@ -386,7 +386,7 @@ export default function ProfilePage() {
         <div className="pt-4 pb-8">
           <button
             onClick={() => router.push('/')}
-            className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-medium shadow-lg hover:shadow-xl transition-all active:scale-98 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-black text-white rounded-2xl font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
           >
             <ArrowBack sx={{ fontSize: 18 }} />
             Вернуться к чату
