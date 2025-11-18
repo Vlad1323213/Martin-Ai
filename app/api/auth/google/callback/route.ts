@@ -28,8 +28,9 @@ export async function GET(request: NextRequest) {
     const tokens = {
       access_token: `demo_access_${Date.now()}`,
       refresh_token: `demo_refresh_${Date.now()}`,
-      email: 'user@gmail.com',
-      expires_at: Date.now() + 3600000 // 1 час
+      expires_in: 3600, // 1 час в секундах
+      token_type: 'Bearer',
+      expires_at: Date.now() + 3600000 // 1 час в миллисекундах
     }
 
     // Сохраняем токены
