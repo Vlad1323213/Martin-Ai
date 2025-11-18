@@ -8,6 +8,7 @@ import EmailListCard from './EmailListCard'
 import EmailDraftCard from './EmailDraftCard'
 import TodoCard from './TodoCard'
 import EventCard from './EventCard'
+import SmsCard from './SmsCard'
 import { useState, useEffect } from 'react'
 
 interface ChatMessageProps {
@@ -123,6 +124,16 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
                   to={message.emailDraft.to}
                   subject={message.emailDraft.subject}
                   body={message.emailDraft.body}
+                />
+              </div>
+            )}
+
+            {/* SMS card */}
+            {message.sms && showActions && (
+              <div className="mt-2 sm:mt-3 w-full animate-fade-in">
+                <SmsCard
+                  to={message.sms.to}
+                  body={message.sms.body}
                 />
               </div>
             )}
