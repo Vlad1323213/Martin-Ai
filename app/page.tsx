@@ -129,26 +129,7 @@ export default function Home() {
     }
   }, [messages])
 
-  // Swipe gesture для открытия drawer
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.touches[0].clientX)
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart === null) return
-
-    const touchEnd = e.changedTouches[0].clientX
-    const distance = touchEnd - touchStart
-    const edgeThreshold = 50 // Область у левого края экрана
-    const swipeThreshold = 100 // Минимальная дистанция свайпа
-
-    // Открываем drawer если свайп начался у левого края и движение вправо
-    if (touchStart < edgeThreshold && distance > swipeThreshold) {
-      setIsDrawerOpen(true)
-    }
-
-    setTouchStart(null)
-  }
+  // Swipe gesture удален - шторка почты больше не нужна
 
   const handleSendMessage = async (content: string) => {
     // Add user message
