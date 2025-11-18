@@ -37,10 +37,45 @@ export default function SettingsPage() {
 
     setIsConnecting(true)
     
+    // Для демо версии - симулируем подключение
+    // В реальном приложении нужен настоящий Google OAuth
+    const isDemoMode = !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 
+                      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID'
+    
+    if (isDemoMode) {
+      // Демо режим - симулируем успешное подключение
+      alert('Демо режим: для реального подключения Google требуется настройка OAuth.\n\nСм. файл GOOGLE_OAUTH_SETUP.md для инструкций.')
+      
+      // Симулируем сохранение токенов для демо
+      const demoTokens = {
+        access_token: 'demo_access_token',
+        refresh_token: 'demo_refresh_token',
+        email: user?.username ? `${user.username}@gmail.com` : 'user@gmail.com'
+      }
+      
+      // Сохраняем демо токены
+      await fetch('/api/tokens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          provider: 'google',
+          tokens: demoTokens
+        })
+      })
+      
+      setIsConnected(true)
+      setIsConnecting(false)
+      
+      // Перенаправляем обратно в профиль
+      setTimeout(() => router.push('/profile'), 1000)
+      return
+    }
+    
     try {
-      // Формируем URL для OAuth
+      // Реальное подключение Google OAuth
       const params = new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '736057891184-t8kdje8n9qo0fsqaoadlhv9o8r8i9nqj.apps.googleusercontent.com',
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         redirect_uri: `${window.location.origin}/api/auth/google/callback`,
         response_type: 'code',
         scope: 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.events email profile',

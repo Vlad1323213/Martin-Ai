@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTokens, disconnect } from '@/lib/token-storage'
+import { getTokens, disconnect, saveTokens } from '@/lib/token-storage'
 
 /**
  * GET /api/tokens?userId=123&provider=google
@@ -33,6 +33,37 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Get tokens error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * POST /api/tokens
+ * Save tokens for a user
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { userId, provider, tokens } = body
+
+    if (!userId || !provider || !tokens) {
+      return NextResponse.json(
+        { error: 'userId, provider and tokens are required' },
+        { status: 400 }
+      )
+    }
+
+    await saveTokens(userId, provider, tokens)
+
+    return NextResponse.json({
+      success: true,
+      message: 'Tokens saved successfully'
+    })
+  } catch (error) {
+    console.error('Save tokens error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
