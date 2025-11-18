@@ -213,7 +213,7 @@ export default function Home() {
         }
       } else {
         // Default AI response - теперь с поддержкой почты
-        const response = await sendToAI(content, user?.id || 'default')
+        const response = await sendToAI(content, user?.id?.toString() || 'default')
         
         // Создаем уведомления для действий AI
         if (response.todos?.length) {
