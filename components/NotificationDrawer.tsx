@@ -25,40 +25,47 @@ export default function NotificationDrawer({ isOpen, onClose }: NotificationDraw
     const loadNotifications = () => {
       const saved = localStorage.getItem('notifications')
       if (saved) {
-        setNotifications(JSON.parse(saved))
-      } else {
-        // Демо уведомления
-        setNotifications([
-          {
-            id: '1',
-            type: 'task',
-            title: 'Задача выполнена',
-            message: 'Задача "Купить продукты" отмечена как выполненная',
-            time: '5 мин назад',
-            read: false
-          },
-          {
-            id: '2',
-            type: 'event',
-            title: 'Напоминание о встрече',
-            message: 'Встреча с командой через 30 минут',
-            time: '30 мин назад',
-            read: false
-          },
-          {
-            id: '3',
-            type: 'email',
-            title: 'Новое письмо',
-            message: 'Получено письмо от support@example.com',
-            time: '1 час назад',
-            read: true
+        const parsed = JSON.parse(saved)
+        // Обновляем время для старых уведомлений
+        const updated = parsed.map((n: Notification) => {
+          if (n.time === 'Только что') {
+            // Вычисляем реальное время
+            const created = new Date(n.id)
+            const now = new Date()
+            const diff = now.getTime() - created.getTime()
+            const minutes = Math.floor(diff / 60000)
+            const hours = Math.floor(minutes / 60)
+            const days = Math.floor(hours / 24)
+            
+            if (days > 0) {
+              n.time = `${days} дн. назад`
+            } else if (hours > 0) {
+              n.time = `${hours} ч. назад`
+            } else if (minutes > 0) {
+              n.time = `${minutes} мин. назад`
+            } else {
+              n.time = 'Только что'
+            }
           }
-        ])
+          return n
+        })
+        setNotifications(updated)
       }
     }
     
     if (isOpen) {
       loadNotifications()
+    }
+    
+    // Подписываемся на события добавления уведомлений
+    const handleNotificationAdded = () => {
+      loadNotifications()
+    }
+    
+    window.addEventListener('notification-added', handleNotificationAdded)
+    
+    return () => {
+      window.removeEventListener('notification-added', handleNotificationAdded)
     }
   }, [isOpen])
 

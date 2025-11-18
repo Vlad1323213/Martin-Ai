@@ -123,6 +123,50 @@ export default function ChatMessage({ message, onActionClick, isLatest = false }
                   to={message.emailDraft.to}
                   subject={message.emailDraft.subject}
                   body={message.emailDraft.body}
+                  onSend={async (to, subject, body) => {
+                    try {
+                      // Получаем user id из localStorage или Telegram
+                      const userSession = localStorage.getItem('userSession')
+                      const userId = userSession ? JSON.parse(userSession).id : 'default'
+                      
+                      // Отправляем через API
+                      const response = await fetch('/api/gmail/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, to, subject, body })
+                      })
+                      
+                      if (response.ok) {
+                        // Добавляем уведомление об успешной отправке
+                        const notification = {
+                          id: Date.now().toString(),
+                          type: 'email' as const,
+                          title: 'Письмо отправлено',
+                          message: `Письмо успешно отправлено на ${to}`,
+                          time: 'Только что',
+                          read: false
+                        }
+                        
+                        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]')
+                        notifications.unshift(notification)
+                        localStorage.setItem('notifications', JSON.stringify(notifications))
+                        localStorage.setItem('unreadNotifications', notifications.filter((n: any) => !n.read).length.toString())
+                        
+                        // Скрываем карточку
+                        message.emailDraft = undefined
+                        window.location.reload() // Перезагружаем для обновления
+                      } else {
+                        alert('Ошибка при отправке письма')
+                      }
+                    } catch (error) {
+                      console.error('Send error:', error)
+                      alert('Не удалось отправить письмо')
+                    }
+                  }}
+                  onCancel={() => {
+                    message.emailDraft = undefined
+                    window.location.reload() // Перезагружаем для скрытия карточки
+                  }}
                 />
               </div>
             )}

@@ -40,6 +40,7 @@ export default function ProfilePage() {
     email: '',
     location: ''
   })
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false)
 
   useEffect(() => {
     // Загружаем сохраненные данные
@@ -55,6 +56,22 @@ export default function ProfilePage() {
         location: 'Не указано'
       })
     }
+    
+    // Проверяем подключение Google
+    const checkGoogle = async () => {
+      if (user?.id) {
+        const response = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
+        const data = await response.json()
+        setIsGoogleConnected(data.connected)
+        
+        // Обновляем email если подключен
+        if (data.connected && data.tokens?.email) {
+          setProfileData(prev => ({ ...prev, email: data.tokens.email }))
+        }
+      }
+    }
+    
+    checkGoogle()
   }, [user])
 
   const handleLogout = async () => {
@@ -267,14 +284,35 @@ export default function ProfilePage() {
             ИНТЕГРАЦИИ
           </h2>
           <div className="bg-gray-50 rounded-xl overflow-hidden">
-            <button className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 transition-colors">
+            <button 
+              onClick={async () => {
+                // Проверяем подключение
+                const response = await fetch(`/api/tokens?userId=${user?.id || 'default'}&provider=google`)
+                const data = await response.json()
+                
+                if (!data.connected) {
+                  // Если не подключен - переходим на страницу авторизации
+                  router.push('/settings')
+                }
+              }}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 via-red-500 to-yellow-500" />
                 <span className="text-sm text-gray-900">Google</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-green-600 font-medium">Подключено</span>
-                <ChevronRight sx={{ fontSize: 18, color: '#9ca3af' }} />
+                {isGoogleConnected ? (
+                  <>
+                    <span className="text-sm text-green-600 font-medium">Подключено</span>
+                    <ChevronRight sx={{ fontSize: 18, color: '#9ca3af' }} />
+                  </>
+                ) : (
+                  <>
+                    <span className="text-sm text-blue-600 font-medium">Подключить</span>
+                    <ChevronRight sx={{ fontSize: 18, color: '#3b82f6' }} />
+                  </>
+                )}
               </div>
             </button>
           </div>

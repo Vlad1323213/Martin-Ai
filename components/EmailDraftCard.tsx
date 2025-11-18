@@ -108,7 +108,7 @@ export default function EmailDraftCard({
               <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                Send
+                Отправить
               </>
             )}
           </button>
@@ -116,7 +116,7 @@ export default function EmailDraftCard({
             onClick={onCancel}
             className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium text-sm hover:bg-gray-700 active:bg-gray-600 transition-colors"
           >
-            Cancel
+            Отмена
           </button>
         </div>
       </div>
