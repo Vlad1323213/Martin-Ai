@@ -42,6 +42,7 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
   const historyLoadedRef = useRef(false)
+  const connectionCheckedRef = useRef(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { webApp, user } = useTelegram()
 
@@ -68,15 +69,24 @@ export default function Home() {
     }
   }, [messages])
 
-  // Проверяем подключение Google и формируем actions
+  // Проверяем подключение Google и формируем actions (только один раз)
   useEffect(() => {
     const checkGoogleConnection = async () => {
+      // Если уже проверяли - пропускаем
+      if (connectionCheckedRef.current) {
+        console.log('⏭️ Проверка подключения уже выполнена')
+        setCheckingConnection(false)
+        return
+      }
+      
       // Проверяем флаг показа онбординга
       const shouldShowOnboarding = localStorage.getItem('showOnboarding')
       if (shouldShowOnboarding === 'true') {
+        console.log('🔄 Показываем онбординг (флаг установлен)')
         setShowOnboarding(true)
         localStorage.removeItem('showOnboarding')
         setCheckingConnection(false)
+        connectionCheckedRef.current = true
         return
       }
       
@@ -86,12 +96,15 @@ export default function Home() {
       }
 
       try {
+        console.log('🔍 Проверка подключения Google...')
         const response = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
         const data = await response.json()
         
         if (!data.connected) {
+          console.log('❌ Google не подключен - показываем онбординг')
           setShowOnboarding(true)
         } else {
+          console.log('✅ Google подключен')
           // Если подключен - формируем actions БЕЗ integrate
           const welcomeActions = [
             {
@@ -110,15 +123,24 @@ export default function Home() {
             },
           ]
           
-          setMessages([{
-            ...initialMessage,
-            actions: welcomeActions
-          }])
+          // Обновляем actions только если это первое сообщение и у него нет actions
+          setMessages(prevMessages => {
+            if (prevMessages.length === 1 && prevMessages[0].id === '1' && (!prevMessages[0].actions || prevMessages[0].actions.length === 0)) {
+              console.log('📝 Добавляем actions к первому сообщению')
+              return [{
+                ...prevMessages[0],
+                actions: welcomeActions
+              }]
+            }
+            console.log('⏭️ Пропускаем обновление actions (уже есть сообщения)')
+            return prevMessages
+          })
         }
       } catch (error) {
-        console.error('Error checking Google connection:', error)
+        console.error('❌ Ошибка проверки подключения:', error)
       } finally {
         setCheckingConnection(false)
+        connectionCheckedRef.current = true
       }
     }
 
