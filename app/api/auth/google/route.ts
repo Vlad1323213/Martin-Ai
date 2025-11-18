@@ -1,31 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getGoogleAuthUrl } from '@/lib/oauth'
 
 export async function GET(request: NextRequest) {
-  const clientId = process.env.GOOGLE_CLIENT_ID
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/api/auth/google/callback'
   const searchParams = request.nextUrl.searchParams
-  const userId = searchParams.get('userId') // Telegram user ID
-
-  if (!clientId) {
-    return NextResponse.json(
-      { error: 'Google OAuth not configured' },
-      { status: 500 }
-    )
-  }
-
-  if (!userId) {
-    return NextResponse.json(
-      { error: 'userId is required' },
-      { status: 400 }
-    )
-  }
-
-  // Используем state parameter для передачи userId (стандартный способ OAuth)
-  const state = userId
+  const userId = searchParams.get('userId')
   
-  const authUrl = getGoogleAuthUrl(redirectUri, clientId, state)
+  if (!userId) {
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+  }
+
+  // Формируем URL для OAuth с правильными параметрами
+  const clientId = '736057891184-t8kdje8n9qo0fsqaoadlhv9o8r8i9nqj.apps.googleusercontent.com'
+  const redirectUri = `${request.nextUrl.origin}/api/auth/google/callback`
+  const scope = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.events email profile'
+  
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: scope,
+    access_type: 'offline',
+    prompt: 'consent',
+    state: userId
+  })
+
+  // Перенаправляем на Google OAuth
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
   
   return NextResponse.redirect(authUrl)
 }
-

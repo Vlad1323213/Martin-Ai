@@ -115,36 +115,24 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     }
   }, [connecting, user, onComplete])
 
-  const handleConnectGoogle = async () => {
-    if (!user?.id) {
+  const handleConnectGoogle = () => {
+    if (!user) {
       alert('Ошибка: не удалось получить ID пользователя')
       return
     }
 
     setConnecting(true)
     
-    try {
-      // Формируем URL для OAuth
-      const clientId = '736057891184-t8kdje8n9qo0fsqaoadlhv9o8r8i9nqj.apps.googleusercontent.com'
-      const redirectUri = `${window.location.origin}/api/auth/google/callback`
-      const scope = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.events email profile'
-      
-      const params = new URLSearchParams({
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        response_type: 'code',
-        scope: scope,
-        access_type: 'offline',
-        prompt: 'consent',
-        state: user.id.toString()
-      })
-
-      // Перенаправляем на Google OAuth
-      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
-    } catch (error) {
-      console.error('Error connecting Google:', error)
-      alert('Ошибка при подключении Google')
-      setConnecting(false)
+    // Открываем OAuth в внешнем браузере
+    const telegramWebApp = (window as any).Telegram?.WebApp
+    const authUrl = `${window.location.origin}/api/auth/google?userId=${user.id}`
+    
+    if (telegramWebApp) {
+      // В Telegram Mini App
+      telegramWebApp.openLink(authUrl)
+    } else {
+      // В обычном браузере
+      window.open(authUrl, '_blank')
     }
   }
 
