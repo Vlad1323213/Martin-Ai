@@ -57,10 +57,29 @@ export default function ProfilePage() {
     }
   }, [user])
 
-  const handleLogout = () => {
-    localStorage.removeItem('userProfile')
-    localStorage.removeItem('googleTokens')
-    webApp?.close()
+  const handleLogout = async () => {
+    // Выход из Google
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST'
+      })
+      
+      if (response.ok) {
+        // Очищаем только данные сессии
+        localStorage.removeItem('googleTokens')
+        localStorage.removeItem('userSession')
+        localStorage.removeItem('chatHistory')
+        
+        // Показываем уведомление
+        alert('Вы вышли из Google аккаунта')
+        
+        // Перезагружаем приложение
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
+      alert('Ошибка при выходе из аккаунта')
+    }
   }
 
   const saveProfile = (data: typeof profileData) => {

@@ -15,6 +15,14 @@ import { useTelegram } from '@/hooks/useTelegram'
 import { parseCommand, generateResponse } from '@/lib/ai-parser'
 import { getTokens } from '@/lib/oauth'
 import { addNotification } from '@/lib/notifications'
+import { 
+  saveChatHistory, 
+  getChatHistory, 
+  addTask as saveTaskToStorage,
+  addEvent as saveEventToStorage,
+  getTasks,
+  getEvents
+} from '@/lib/storage'
 
 // Динамическое начальное сообщение создается в компоненте
 const initialMessage: Message = {
@@ -27,14 +35,35 @@ const initialMessage: Message = {
 
 export default function Home() {
   const router = useRouter()
-  const [messages, setMessages] = useState<Message[]>([initialMessage])
+  const [messages, setMessages] = useState<Message[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { webApp, user } = useTelegram()
+
+  // Загружаем историю чата при старте
+  useEffect(() => {
+    if (!historyLoaded) {
+      const history = getChatHistory()
+      if (history && history.length > 0) {
+        setMessages(history)
+      } else {
+        setMessages([initialMessage])
+      }
+      setHistoryLoaded(true)
+    }
+  }, [historyLoaded])
+
+  // Сохраняем историю при изменении
+  useEffect(() => {
+    if (messages.length > 0 && historyLoaded) {
+      saveChatHistory(messages)
+    }
+  }, [messages, historyLoaded])
 
   // Проверяем подключение Google и формируем actions
   useEffect(() => {
@@ -215,8 +244,13 @@ export default function Home() {
         // Default AI response - теперь с поддержкой почты
         const response = await sendToAI(content, user?.id?.toString() || 'default')
         
-        // Создаем уведомления для действий AI
+        // Создаем уведомления и сохраняем данные
         if (response.todos?.length) {
+          // Сохраняем задачи в localStorage
+          response.todos.forEach((todo: any) => {
+            saveTaskToStorage(todo.text)
+          })
+          
           addNotification(
             'task',
             'Задача добавлена',
@@ -225,6 +259,16 @@ export default function Home() {
         }
         
         if (response.events?.length) {
+          // Сохраняем события в localStorage
+          response.events.forEach((event: any) => {
+            saveEventToStorage({
+              title: event.title,
+              startTime: event.startTime,
+              endTime: event.endTime,
+              location: event.location
+            })
+          })
+          
           addNotification(
             'event',
             'Событие создано',

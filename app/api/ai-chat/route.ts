@@ -431,46 +431,74 @@ function formatResponse(result: any, originalMessage: string, userId: string) {
 async function handleSimple(message: string, userId: string) {
   const lower = message.toLowerCase()
   
-  // Обработка почты
-  if (/почт|письм|email|gmail|переслать|отправ.*письм|найди.*письм/i.test(lower)) {
-    // Поиск письма
+  // Обработка почты - всегда возвращаем карточки
+  if (/почт|письм|email|gmail|переслать|отправ/i.test(lower)) {
+    // Извлекаем получателя если указан
+    const toMatch = lower.match(/(?:кому|на|для|итан|мам|отц|друг)\s*(\S+)?/i)
+    let recipient = 'example@gmail.com'
+    
+    if (toMatch && toMatch[1]) {
+      const name = toMatch[1].toLowerCase()
+      if (name.includes('итан') || name.includes('ethan')) {
+        recipient = 'ethan@trymartin.com'
+      } else if (name.includes('мам')) {
+        recipient = 'mom@gmail.com'
+      } else if (name.includes('@')) {
+        recipient = name
+      } else {
+        recipient = `${name}@gmail.com`
+      }
+    }
+    
+    // Проверка почты - показываем найденное письмо И черновик ответа
     if (/найди.*письм|проверь.*почт|покажи.*письм/i.test(lower)) {
       return {
-        text: 'Нашел письмо с информацией о рейсе. Подготовил черновик для пересылки.',
-        emailDraft: {
-          to: 'example@gmail.com',
-          subject: 'Flight Itinerary',
-          body: `Привет!
-
-Вот информация о рейсе:
-
+        text: `Нашел письмо от мамы с информацией о рейсе.
+        
 Рейс 1: UA854
-- Дата: 12 ноября 2024
-- Вылет: 16:20 из Houston, TX
-- Прилет: 23:55 в Lima, PE
+• 12 ноября 2024
+• Вылет: 16:20 из Houston, TX  
+• Прилет: 23:55 в Lima, PE
 
-Рейс 2: UA3047  
-- Дата: 12 ноября 2024
-- Вылет: 08:35 из San Francisco, CA
-- Прилет: 14:15 в Houston, TX
+Рейс 2: UA3047
+• 12 ноября 2024
+• Вылет: 08:35 из San Francisco, CA
+• Прилет: 14:15 в Houston, TX
 
-С уважением`
+Подготовил черновик для пересылки.`,
+        emailDraft: {
+          to: recipient,
+          subject: 'Flight Itinerary',
+          body: `Hi!
+
+Here is my flight itinerary:
+
+Flight 1: UA854
+- Date: November 12, 2024
+- Departure: 04:20 PM from Houston, TX
+- Arrival: 11:55 PM in Lima, PE
+
+Flight 2: UA3047
+- Date: November 12, 2024  
+- Departure: 08:35 AM from San Francisco, CA
+- Arrival: 02:15 PM in Houston, TX
+
+Let me know if you need anything else!`
         }
       }
     }
     
-    // Отправить письмо
-    if (/отправ|переслать|напиши.*письм/i.test(lower)) {
-      const toMatch = lower.match(/(?:кому|на|для)\s+(\S+@\S+|\w+)/i)
-      const to = toMatch ? toMatch[1] : 'user@example.com'
-      
-      return {
-        text: `Подготовил черновик письма для ${to}. Вы можете отредактировать и отправить.`,
-        emailDraft: {
-          to: to.includes('@') ? to : `${to}@gmail.com`,
-          subject: 'Информация',
-          body: 'Добрый день!\n\nВысылаю запрошенную информацию.\n\nС уважением'
-        }
+    // Отправка письма - всегда показываем карточку
+    return {
+      text: `Подготовил черновик письма для ${recipient}. Вы можете отредактировать текст и нажать "Send" для отправки.`,
+      emailDraft: {
+        to: recipient,
+        subject: 'Information',
+        body: `Hello!
+
+I'm sending you the requested information.
+
+Best regards`
       }
     }
   }
