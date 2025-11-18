@@ -19,7 +19,10 @@ import {
   Settings,
   Logout,
   ArrowBack,
-  ChevronRight
+  ChevronRight,
+  Login,
+  CheckCircle,
+  Cancel
 } from '@mui/icons-material'
 import { useTelegram } from '@/hooks/useTelegram'
 
@@ -41,6 +44,7 @@ export default function ProfilePage() {
     location: ''
   })
   const [isGoogleConnected, setIsGoogleConnected] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     // Загружаем сохраненные данные
@@ -52,52 +56,65 @@ export default function ProfilePage() {
       setProfileData({
         name: `${user.first_name} ${user.last_name || ''}`.trim(),
         phone: 'Базовый',
-        email: 'Базовый',
+        email: 'Не подключен',
         location: 'Не указано'
       })
     }
     
     // Проверяем подключение Google
-    const checkGoogle = async () => {
-      if (user?.id) {
+    checkGoogleConnection()
+  }, [user])
+
+  const checkGoogleConnection = async () => {
+    if (user?.id) {
+      try {
         const response = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
         const data = await response.json()
-        setIsGoogleConnected(data.connected)
+        setIsGoogleConnected(data.connected === true)
         
         // Обновляем email если подключен
         if (data.connected && data.tokens?.email) {
           setProfileData(prev => ({ ...prev, email: data.tokens.email }))
+        } else {
+          setProfileData(prev => ({ ...prev, email: 'Не подключен' }))
         }
+      } catch (error) {
+        console.error('Error checking Google:', error)
+        setIsGoogleConnected(false)
       }
     }
-    
-    checkGoogle()
-  }, [user])
+  }
 
-  const handleLogout = async () => {
-    // Выход из Google
+  const handleGoogleLogout = async () => {
+    if (!user?.id) return
+    
+    setIsLoading(true)
     try {
-      // Если есть user id, очищаем токены на сервере
-      if (user?.id) {
-        await fetch(`/api/tokens?userId=${user.id}&provider=google`, {
-          method: 'DELETE'
-        })
-      }
+      // Удаляем токены на сервере
+      await fetch(`/api/tokens?userId=${user.id}&provider=google`, {
+        method: 'DELETE'
+      })
       
       // Очищаем локальные данные Google
       localStorage.removeItem('googleTokens')
-      localStorage.removeItem('userSession')
-      localStorage.removeItem('chatHistory')
+      
+      // Обновляем состояние
+      setIsGoogleConnected(false)
+      setProfileData(prev => ({ ...prev, email: 'Не подключен' }))
       
       // Показываем уведомление
       alert('Вы вышли из Google аккаунта')
-      
-      // Перезагружаем приложение
-      window.location.reload()
     } catch (error) {
       console.error('Logout error:', error)
       alert('Ошибка при выходе из аккаунта')
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  const handleGoogleLogin = () => {
+    // Переходим на страницу настроек для авторизации
+    router.push('/settings')
   }
 
   const saveProfile = (data: typeof profileData) => {
@@ -121,7 +138,7 @@ export default function ProfilePage() {
     {
       icon: <Email sx={{ fontSize: 20 }} />,
       label: 'Email',
-      value: profileData.email || 'Базовый',
+      value: profileData.email || 'Не подключен',
       type: 'basic'
     },
     {
@@ -196,50 +213,124 @@ export default function ProfilePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Header с градиентом */}
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="flex items-center justify-between px-4 py-3">
           <button
             onClick={() => router.push('/')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-all hover:scale-105 active:scale-95"
           >
             <ArrowBack sx={{ fontSize: 24, color: '#1f2937' }} />
           </button>
           
-          <h1 className="text-lg font-semibold text-gray-900">Профиль</h1>
+          <h1 className="text-lg font-semibold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            Профиль
+          </h1>
           
-          <button
-            onClick={handleLogout}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Logout sx={{ fontSize: 24, color: '#ef4444' }} />
-          </button>
+          <div className="w-10" /> {/* Spacer для центрирования */}
         </div>
       </div>
 
       {/* Content */}
-      <div className="px-4 py-6 space-y-8">
+      <div className="px-4 py-6 space-y-6">
+        {/* User Avatar Section */}
+        <div className="flex flex-col items-center py-4">
+          <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+            {profileData.name?.charAt(0) || 'U'}
+          </div>
+          <h2 className="mt-3 text-xl font-semibold text-gray-900">
+            {profileData.name || 'Пользователь'}
+          </h2>
+          <p className="text-sm text-gray-500">
+            {profileData.email !== 'Не подключен' ? profileData.email : 'Email не подключен'}
+          </p>
+        </div>
+
+        {/* Google Account Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+              Google Аккаунт
+            </h3>
+          </div>
+          
+          <div className="p-4">
+            {isGoogleConnected ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 via-red-500 to-yellow-500 p-0.5">
+                      <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
+                        <CheckCircle sx={{ fontSize: 20, color: '#10b981' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Подключено</p>
+                      <p className="text-xs text-gray-500">{profileData.email}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleGoogleLogout}
+                  disabled={isLoading}
+                  className="w-full py-2.5 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all active:scale-98 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Logout sx={{ fontSize: 18 }} />
+                      Выйти из Google
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Cancel sx={{ fontSize: 20, color: '#9ca3af' }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Не подключено</p>
+                    <p className="text-xs text-gray-500">Подключите для полного функционала</p>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleGoogleLogin}
+                  className="w-full py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all active:scale-98 flex items-center justify-center gap-2"
+                >
+                  <Login sx={{ fontSize: 18 }} />
+                  Войти в Google
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Profile Section */}
         <div>
-          <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-            ПРОФИЛЬ
+          <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 px-1">
+            Информация
           </h2>
-          <div className="bg-gray-50 rounded-xl overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {profileItems.map((item, index) => (
               <button
                 key={index}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 transition-colors border-b border-gray-200 last:border-0"
+                className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
               >
                 <div className="flex items-center gap-3">
-                  <div className="text-gray-600">
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
                     {item.icon}
                   </div>
-                  <span className="text-sm text-gray-900">{item.label}</span>
+                  <span className="text-sm font-medium text-gray-900">{item.label}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500">{item.value}</span>
-                  <ChevronRight sx={{ fontSize: 18, color: '#9ca3af' }} />
+                  <ChevronRight sx={{ fontSize: 18, color: '#d1d5db' }} />
                 </div>
               </button>
             ))}
@@ -248,83 +339,50 @@ export default function ProfilePage() {
 
         {/* Tools Section */}
         <div>
-          <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-            ИНСТРУМЕНТЫ
+          <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 px-1">
+            Инструменты
           </h2>
-          <div className="bg-gray-50 rounded-xl overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {toolItems.map((item, index) => (
               <button
                 key={index}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 transition-colors border-b border-gray-200 last:border-0"
+                className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
               >
                 <div className="flex items-center gap-3">
-                  <div className="text-gray-600">
-                    {item.icon}
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    item.type === 'pro' ? 'bg-gradient-to-br from-blue-100 to-purple-100' : 'bg-gray-100'
+                  }`}>
+                    <div className={item.type === 'pro' ? 'text-blue-600' : 'text-gray-600'}>
+                      {item.icon}
+                    </div>
                   </div>
-                  <span className="text-sm text-gray-900">{item.label}</span>
+                  <span className="text-sm font-medium text-gray-900">{item.label}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {item.value && (
-                    <span className={`text-sm ${
-                      item.type === 'pro' ? 'text-blue-500 font-medium' : 'text-gray-500'
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      item.type === 'pro' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
+                        : 'bg-gray-100 text-gray-600'
                     }`}>
                       {item.value}
                     </span>
                   )}
-                  <ChevronRight sx={{ fontSize: 18, color: '#9ca3af' }} />
+                  <ChevronRight sx={{ fontSize: 18, color: '#d1d5db' }} />
                 </div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Integrations Section */}
-        <div>
-          <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-            ИНТЕГРАЦИИ
-          </h2>
-          <div className="bg-gray-50 rounded-xl overflow-hidden">
-            <button 
-              onClick={async () => {
-                // Проверяем подключение
-                const response = await fetch(`/api/tokens?userId=${user?.id || 'default'}&provider=google`)
-                const data = await response.json()
-                
-                if (!data.connected) {
-                  // Если не подключен - переходим на страницу авторизации
-                  router.push('/settings')
-                }
-              }}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 via-red-500 to-yellow-500" />
-                <span className="text-sm text-gray-900">Google</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {isGoogleConnected ? (
-                  <>
-                    <span className="text-sm text-green-600 font-medium">Подключено</span>
-                    <ChevronRight sx={{ fontSize: 18, color: '#9ca3af' }} />
-                  </>
-                ) : (
-                  <>
-                    <span className="text-sm text-blue-600 font-medium">Подключить</span>
-                    <ChevronRight sx={{ fontSize: 18, color: '#3b82f6' }} />
-                  </>
-                )}
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Logout Button */}
-        <div className="pt-4">
+        {/* Back to Chat Button */}
+        <div className="pt-4 pb-8">
           <button
-            onClick={handleLogout}
-            className="w-full py-3 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors"
+            onClick={() => router.push('/')}
+            className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-medium shadow-lg hover:shadow-xl transition-all active:scale-98 flex items-center justify-center gap-2"
           >
-            Выйти из аккаунта
+            <ArrowBack sx={{ fontSize: 18 }} />
+            Вернуться к чату
           </button>
         </div>
       </div>
