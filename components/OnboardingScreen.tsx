@@ -147,7 +147,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src="/video_2025-11-15_14-55-37.mp4" type="video/mp4" />
+          <source src="/video_2025-11-14_15-19-04.mp4" type="video/mp4" />
         </video>
       </div>
 
