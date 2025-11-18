@@ -95,33 +95,27 @@ export default function ProfilePage() {
         method: 'DELETE'
       })
       
-      // Очищаем локальные данные Google
-      localStorage.removeItem('googleTokens')
-      localStorage.removeItem('userSession')
-      localStorage.removeItem('chatHistory')
+      // Очищаем все локальные данные
+      localStorage.clear()
       
-      // Обновляем состояние
-      setIsGoogleConnected(false)
-      setProfileData(prev => ({ ...prev, email: 'Не подключен' }))
+      // Устанавливаем флаг для показа онбординга
+      localStorage.setItem('showOnboarding', 'true')
       
-      // Перенаправляем на онбординг
-      setTimeout(() => {
-        router.push('/')
-        // Устанавливаем флаг для показа онбординга
-        localStorage.setItem('showOnboarding', 'true')
-        window.location.reload()
-      }, 500)
+      // Сразу перенаправляем на онбординг
+      window.location.href = '/'
     } catch (error) {
       console.error('Logout error:', error)
-      alert('Ошибка при выходе из аккаунта')
-    } finally {
-      setIsLoading(false)
+      // Даже если ошибка - все равно выходим
+      localStorage.clear()
+      localStorage.setItem('showOnboarding', 'true')
+      window.location.href = '/'
     }
   }
 
   const handleGoogleLogin = () => {
-    // Переходим на страницу настроек для авторизации
-    router.push('/settings')
+    // Переходим на онбординг для авторизации
+    localStorage.setItem('showOnboarding', 'true')
+    router.push('/')
   }
 
   const saveProfile = (data: typeof profileData) => {
@@ -307,7 +301,7 @@ export default function ProfilePage() {
                 </div>
                 
                 <button
-                  onClick={() => router.push('/settings')}
+                  onClick={handleGoogleLogin}
                   className="w-full py-2.5 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all active:scale-98 flex items-center justify-center gap-2"
                 >
                   <Login sx={{ fontSize: 18 }} />
