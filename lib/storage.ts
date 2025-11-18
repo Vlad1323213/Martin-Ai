@@ -89,30 +89,45 @@ export function deleteEvent(id: string) {
 
 // История чата
 export function saveChatHistory(messages: any[]) {
-  const history: ChatHistory = {
-    messages: messages.slice(-100), // Сохраняем последние 100 сообщений
-    lastUpdated: new Date().toISOString()
+  try {
+    const history: ChatHistory = {
+      messages: messages.slice(-100), // Сохраняем последние 100 сообщений
+      lastUpdated: new Date().toISOString()
+    }
+    localStorage.setItem('chatHistory', JSON.stringify(history))
+    console.log('✅ История чата сохранена:', messages.length, 'сообщений')
+  } catch (error) {
+    console.error('❌ Ошибка сохранения истории чата:', error)
   }
-  localStorage.setItem('chatHistory', JSON.stringify(history))
 }
 
 export function getChatHistory(): any[] {
-  const saved = localStorage.getItem('chatHistory')
-  if (!saved) return []
-  
-  const history: ChatHistory = JSON.parse(saved)
-  
-  // Проверяем, не устарела ли история (больше 7 дней)
-  const lastUpdated = new Date(history.lastUpdated)
-  const now = new Date()
-  const daysDiff = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24)
-  
-  if (daysDiff > 7) {
-    localStorage.removeItem('chatHistory')
+  try {
+    const saved = localStorage.getItem('chatHistory')
+    if (!saved) {
+      console.log('📭 История чата пуста')
+      return []
+    }
+    
+    const history: ChatHistory = JSON.parse(saved)
+    
+    // Проверяем, не устарела ли история (больше 30 дней)
+    const lastUpdated = new Date(history.lastUpdated)
+    const now = new Date()
+    const daysDiff = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24)
+    
+    if (daysDiff > 30) {
+      console.log('⏰ История чата устарела (больше 30 дней)')
+      localStorage.removeItem('chatHistory')
+      return []
+    }
+    
+    console.log('✅ История чата загружена:', history.messages.length, 'сообщений')
+    return history.messages
+  } catch (error) {
+    console.error('❌ Ошибка загрузки истории чата:', error)
     return []
   }
-  
-  return history.messages
 }
 
 // Сессия пользователя

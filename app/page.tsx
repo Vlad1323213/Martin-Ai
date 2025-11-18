@@ -41,29 +41,32 @@ export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
-  const [historyLoaded, setHistoryLoaded] = useState(false)
+  const historyLoadedRef = useRef(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { webApp, user } = useTelegram()
 
-  // Загружаем историю чата при старте
+  // Загружаем историю чата при старте (только один раз)
   useEffect(() => {
-    if (!historyLoaded) {
+    if (!historyLoadedRef.current) {
       const history = getChatHistory()
       if (history && history.length > 0) {
+        console.log('✅ Загружена история чата:', history.length, 'сообщений')
         setMessages(history)
       } else {
+        console.log('📝 Создано начальное сообщение')
         setMessages([initialMessage])
       }
-      setHistoryLoaded(true)
+      historyLoadedRef.current = true
     }
-  }, [historyLoaded])
+  }, [])
 
   // Сохраняем историю при изменении
   useEffect(() => {
-    if (messages.length > 0 && historyLoaded) {
+    if (messages.length > 0 && historyLoadedRef.current) {
+      console.log('💾 Сохранение истории чата:', messages.length, 'сообщений')
       saveChatHistory(messages)
     }
-  }, [messages, historyLoaded])
+  }, [messages])
 
   // Проверяем подключение Google и формируем actions
   useEffect(() => {
