@@ -49,23 +49,33 @@ export default function Home() {
   // Загружаем историю чата при старте (только один раз)
   useEffect(() => {
     if (!historyLoadedRef.current) {
-      const history = getChatHistory()
-      if (history && history.length > 0) {
-        console.log('✅ Загружена история чата:', history.length, 'сообщений')
-        setMessages(history)
-      } else {
-        console.log('📝 Создано начальное сообщение')
+      try {
+        const history = getChatHistory()
+        if (history && history.length > 0) {
+          console.log('✅ Загружена история чата:', history.length, 'сообщений')
+          setMessages(history)
+        } else {
+          console.log('📝 Создано начальное сообщение')
+          setMessages([initialMessage])
+        }
+        historyLoadedRef.current = true
+      } catch (error) {
+        console.error('❌ Ошибка загрузки истории:', error)
         setMessages([initialMessage])
+        historyLoadedRef.current = true
       }
-      historyLoadedRef.current = true
     }
   }, [])
 
   // Сохраняем историю при изменении
   useEffect(() => {
     if (messages.length > 0 && historyLoadedRef.current) {
-      console.log('💾 Сохранение истории чата:', messages.length, 'сообщений')
-      saveChatHistory(messages)
+      try {
+        console.log('💾 Сохранение истории чата:', messages.length, 'сообщений')
+        saveChatHistory(messages)
+      } catch (error) {
+        console.error('❌ Ошибка сохранения истории:', error)
+      }
     }
   }, [messages])
 
