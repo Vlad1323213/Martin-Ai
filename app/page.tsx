@@ -41,14 +41,13 @@ export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
-  const historyLoadedRef = useRef(false)
-  const connectionCheckedRef = useRef(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { webApp, user } = useTelegram()
 
-  // Загружаем историю чата при старте (только один раз)
+  // Загружаем историю чата при старте
   useEffect(() => {
-    if (!historyLoadedRef.current) {
+    if (!historyLoaded) {
       try {
         const history = getChatHistory()
         if (history && history.length > 0) {
@@ -58,45 +57,34 @@ export default function Home() {
           console.log('📝 Создано начальное сообщение')
           setMessages([initialMessage])
         }
-        historyLoadedRef.current = true
       } catch (error) {
         console.error('❌ Ошибка загрузки истории:', error)
         setMessages([initialMessage])
-        historyLoadedRef.current = true
       }
+      setHistoryLoaded(true)
     }
-  }, [])
+  }, [historyLoaded])
 
   // Сохраняем историю при изменении
   useEffect(() => {
-    if (messages.length > 0 && historyLoadedRef.current) {
+    if (messages.length > 0 && historyLoaded) {
       try {
-        console.log('💾 Сохранение истории чата:', messages.length, 'сообщений')
         saveChatHistory(messages)
       } catch (error) {
         console.error('❌ Ошибка сохранения истории:', error)
       }
     }
-  }, [messages])
+  }, [messages, historyLoaded])
 
-  // Проверяем подключение Google и формируем actions (только один раз)
+  // Проверяем подключение Google и формируем actions
   useEffect(() => {
     const checkGoogleConnection = async () => {
-      // Если уже проверяли - пропускаем
-      if (connectionCheckedRef.current) {
-        console.log('⏭️ Проверка подключения уже выполнена')
-        setCheckingConnection(false)
-        return
-      }
-      
       // Проверяем флаг показа онбординга
       const shouldShowOnboarding = localStorage.getItem('showOnboarding')
       if (shouldShowOnboarding === 'true') {
-        console.log('🔄 Показываем онбординг (флаг установлен)')
         setShowOnboarding(true)
         localStorage.removeItem('showOnboarding')
         setCheckingConnection(false)
-        connectionCheckedRef.current = true
         return
       }
       
@@ -106,58 +94,23 @@ export default function Home() {
       }
 
       try {
-        console.log('🔍 Проверка подключения Google...')
         const response = await fetch(`/api/tokens?userId=${user.id}&provider=google`)
         const data = await response.json()
         
         if (!data.connected) {
-          console.log('❌ Google не подключен - показываем онбординг')
           setShowOnboarding(true)
-        } else {
-          console.log('✅ Google подключен')
-          // Если подключен - формируем actions БЕЗ integrate
-          const welcomeActions = [
-            {
-              id: 'email',
-              title: 'Проверить непрочитанные письма',
-              subtitle: 'Gmail',
-              icon: 'email' as const,
-              type: 'email' as const,
-            },
-            {
-              id: 'todo',
-              title: 'Создать список дел',
-              subtitle: 'Планирование задач',
-              icon: 'todo' as const,
-              type: 'todo' as const,
-            },
-          ]
-          
-          // Обновляем actions только если это первое сообщение и у него нет actions
-          setMessages(prevMessages => {
-            if (prevMessages.length === 1 && prevMessages[0].id === '1' && (!prevMessages[0].actions || prevMessages[0].actions.length === 0)) {
-              console.log('📝 Добавляем actions к первому сообщению')
-              return [{
-                ...prevMessages[0],
-                actions: welcomeActions
-              }]
-            }
-            console.log('⏭️ Пропускаем обновление actions (уже есть сообщения)')
-            return prevMessages
-          })
         }
       } catch (error) {
-        console.error('❌ Ошибка проверки подключения:', error)
+        console.error('Error checking Google connection:', error)
       } finally {
         setCheckingConnection(false)
-        connectionCheckedRef.current = true
       }
     }
 
-    if (user) {
+    if (user && checkingConnection) {
       checkGoogleConnection()
     }
-  }, [user])
+  }, [user, checkingConnection])
 
   // Обработка OAuth redirect для Telegram Mini App
   useEffect(() => {
