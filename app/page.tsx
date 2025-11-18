@@ -28,9 +28,7 @@ export default function Home() {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([initialMessage])
   const [isTyping, setIsTyping] = useState(false)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [touchStart, setTouchStart] = useState<number | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -382,14 +380,7 @@ export default function Home() {
   }
 
   return (
-    <div 
-      className="flex flex-col h-screen w-screen bg-white overflow-hidden"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      {/* Drawer */}
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
-
+    <div className="flex flex-col h-screen w-screen bg-white overflow-hidden">
       {/* Settings Modal */}
       <SettingsModal 
         isOpen={isSettingsOpen} 
@@ -397,7 +388,6 @@ export default function Home() {
       />
 
       <Header 
-        onMenuClick={() => setIsDrawerOpen(true)}
         onSettingsClick={() => setIsSettingsOpen(true)}
       />
 
