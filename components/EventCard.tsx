@@ -18,7 +18,7 @@ export default function EventCard({ title, datetime, location }: EventCardProps)
   }, [])
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-3 shadow-md hover:shadow-lg transition-all animate-slide-up">
+    <div className="w-full bg-white border border-gray-200 rounded-2xl p-4 mb-3 shadow-md hover:shadow-lg transition-all animate-slide-up">
       {/* Заголовок */}
       <h3 className="text-gray-900 font-bold text-base mb-3">{title}</h3>
 

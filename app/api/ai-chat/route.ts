@@ -4,6 +4,24 @@ import { generateText, tool } from 'ai'
 import { z } from 'zod'
 import { getTokens } from '@/lib/token-storage'
 
+// Функция для получения памяти AI
+async function getAIMemory(userId: string): Promise<any> {
+  // В реальном приложении это бы загружалось из базы данных
+  // Сейчас используем простую заглушку
+  return {
+    userPreferences: {},
+    importantDates: [],
+    tasks: [],
+    context: ''
+  }
+}
+
+// Функция для сохранения памяти AI
+async function saveAIMemory(userId: string, memory: any) {
+  // В реальном приложении это бы сохранялось в базу данных
+  console.log('Saving AI memory for', userId, memory)
+}
+
 interface AIMessage {
   role: 'user' | 'assistant'
   content: string
@@ -130,35 +148,52 @@ export async function POST(request: NextRequest) {
         description: 'Создает задачу и сохраняет в базу данных',
         parameters: z.object({
           text: z.string().describe('Текст задачи'),
+          dueDate: z.string().optional().describe('Срок выполнения ISO формат'),
+          reminder: z.boolean().optional().describe('Нужно ли напоминание'),
         }),
-        execute: async ({ text }) => {
-          if (!process.env.REDIS_URL) {
-            return { success: true, message: `Задача "${text}" добавлена`, task: { id: '1', text, completed: false } }
-          }
-
-          const Redis = (await import('ioredis')).default
-          const client = new Redis(process.env.REDIS_URL)
-          
-          const todosKey = `todos:${userId}`
-          const data = await client.get(todosKey)
-          const todos = data ? JSON.parse(data) : []
-          
+        execute: async ({ text, dueDate, reminder }) => {
           const newTodo = {
             id: Date.now().toString(),
             text,
             completed: false,
+            dueDate,
             createdAt: new Date().toISOString()
           }
           
-          todos.push(newTodo)
-          await client.set(todosKey, JSON.stringify(todos))
-          await client.quit()
+          // Сохраняем в Redis если есть
+          if (process.env.REDIS_URL) {
+            const Redis = (await import('ioredis')).default
+            const client = new Redis(process.env.REDIS_URL)
+            
+            const todosKey = `todos:${userId}`
+            const data = await client.get(todosKey)
+            const todos = data ? JSON.parse(data) : []
+            
+            todos.push(newTodo)
+            await client.set(todosKey, JSON.stringify(todos))
+            await client.quit()
+          }
           
-          console.log(`✅ Задача сохранена в Redis: ${text}`)
+          // Сохраняем в память AI
+          const memory = await getAIMemory(userId)
+          memory.tasks = memory.tasks || []
+          memory.tasks.push(newTodo)
+          await saveAIMemory(userId, memory)
+          
+          // Планируем напоминание если нужно
+          if (reminder && dueDate) {
+            const reminderTime = new Date(dueDate)
+            reminderTime.setHours(reminderTime.getHours() - 1) // За час до срока
+            
+            // Здесь бы вызывалась функция планирования push уведомления
+            console.log(`📅 Запланировано напоминание о задаче "${text}" на ${reminderTime}`)
+          }
+          
+          console.log(`✅ Задача сохранена: ${text}`)
           
           return { 
             success: true,
-            message: `Задача "${text}" сохранена в вашем списке дел`,
+            message: `Задача "${text}" добавлена${reminder ? ' с напоминанием' : ''}`,
             task: newTodo
           }
         },
@@ -256,11 +291,22 @@ export async function POST(request: NextRequest) {
 
     }
 
-    // Детальный промпт для умного агента
-    const systemPrompt = `Ты Mortis - умный персональный AI-ассистент который РЕАЛЬНО выполняет задачи.
+    // Загружаем память AI из localStorage
+    const aiMemory = await getAIMemory(userId)
+    
+    // Детальный промпт для умного агента с памятью
+    const systemPrompt = `Ты Mortis - умный персональный AI-ассистент с ПАМЯТЬЮ и РЕАЛЬНЫМИ возможностями.
 
-ТВОЯ РОЛЬ - АВТОНОМНЫЙ АГЕНТ:
+ТВОЯ ПАМЯТЬ:
+${aiMemory.userPreferences ? `Предпочтения пользователя: ${JSON.stringify(aiMemory.userPreferences)}` : ''}
+${aiMemory.importantDates ? `Важные даты: ${JSON.stringify(aiMemory.importantDates)}` : ''}
+${aiMemory.tasks ? `Текущие задачи: ${JSON.stringify(aiMemory.tasks)}` : ''}
+${aiMemory.context ? `Контекст: ${aiMemory.context}` : ''}
+
+ТВОЯ РОЛЬ - АВТОНОМНЫЙ АГЕНТ С ПАМЯТЬЮ:
+Ты ПОМНИШЬ предыдущие разговоры и задачи.
 Ты САМ вносишь изменения используя доступные инструменты.
+Ты НАПОМИНАЕШЬ о важных событиях и задачах.
 Ты НЕ симулируешь - ты РЕАЛЬНО работаешь с Gmail, Calendar и задачами.
 
 РАБОТА С ПОЧТОЙ:

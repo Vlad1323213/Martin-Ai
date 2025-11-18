@@ -68,6 +68,15 @@ export default function Home() {
   // Проверяем подключение Google и формируем actions
   useEffect(() => {
     const checkGoogleConnection = async () => {
+      // Проверяем флаг показа онбординга
+      const shouldShowOnboarding = localStorage.getItem('showOnboarding')
+      if (shouldShowOnboarding === 'true') {
+        setShowOnboarding(true)
+        localStorage.removeItem('showOnboarding')
+        setCheckingConnection(false)
+        return
+      }
+      
       if (!user) {
         setCheckingConnection(false)
         return

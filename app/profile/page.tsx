@@ -97,13 +97,20 @@ export default function ProfilePage() {
       
       // Очищаем локальные данные Google
       localStorage.removeItem('googleTokens')
+      localStorage.removeItem('userSession')
+      localStorage.removeItem('chatHistory')
       
       // Обновляем состояние
       setIsGoogleConnected(false)
       setProfileData(prev => ({ ...prev, email: 'Не подключен' }))
       
-      // Показываем уведомление
-      alert('Вы вышли из Google аккаунта')
+      // Перенаправляем на онбординг
+      setTimeout(() => {
+        router.push('/')
+        // Устанавливаем флаг для показа онбординга
+        localStorage.setItem('showOnboarding', 'true')
+        window.location.reload()
+      }, 500)
     } catch (error) {
       console.error('Logout error:', error)
       alert('Ошибка при выходе из аккаунта')
@@ -213,18 +220,18 @@ export default function ProfilePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Header с градиентом */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between px-4 py-3">
           <button
             onClick={() => router.push('/')}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-all hover:scale-105 active:scale-95"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowBack sx={{ fontSize: 24, color: '#1f2937' }} />
+            <ArrowBack sx={{ fontSize: 24, color: '#000000' }} />
           </button>
           
-          <h1 className="text-lg font-semibold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+          <h1 className="text-lg font-semibold text-black">
             Профиль
           </h1>
           
@@ -236,13 +243,13 @@ export default function ProfilePage() {
       <div className="px-4 py-6 space-y-6">
         {/* User Avatar Section */}
         <div className="flex flex-col items-center py-4">
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+          <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center text-white text-3xl font-bold">
             {profileData.name?.charAt(0) || 'U'}
           </div>
-          <h2 className="mt-3 text-xl font-semibold text-gray-900">
+          <h2 className="mt-3 text-xl font-semibold text-black">
             {profileData.name || 'Пользователь'}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-600">
             {profileData.email !== 'Не подключен' ? profileData.email : 'Email не подключен'}
           </p>
         </div>

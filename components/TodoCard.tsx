@@ -32,7 +32,7 @@ export default function TodoCard({ title, todos, onToggle }: TodoCardProps) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-3 shadow-md hover:shadow-lg transition-all animate-slide-up">
+    <div className="w-full bg-white border border-gray-200 rounded-2xl p-4 mb-3 shadow-md hover:shadow-lg transition-all animate-slide-up">
       {/* Заголовок с иконкой */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
