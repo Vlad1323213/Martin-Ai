@@ -95,8 +95,14 @@ export default function ProfilePage() {
         method: 'DELETE'
       })
       
-      // Очищаем все локальные данные
-      localStorage.clear()
+      // Сохраняем историю чата перед очисткой
+      const chatHistory = localStorage.getItem('chatHistory')
+      const tasks = localStorage.getItem('tasks')
+      const events = localStorage.getItem('events')
+      
+      // Очищаем только данные авторизации
+      localStorage.removeItem('googleTokens')
+      localStorage.removeItem('userSession')
       
       // Устанавливаем флаг для показа онбординга
       localStorage.setItem('showOnboarding', 'true')
@@ -106,7 +112,8 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Logout error:', error)
       // Даже если ошибка - все равно выходим
-      localStorage.clear()
+      localStorage.removeItem('googleTokens')
+      localStorage.removeItem('userSession')
       localStorage.setItem('showOnboarding', 'true')
       window.location.href = '/'
     }
@@ -219,7 +226,7 @@ export default function ProfilePage() {
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between px-4 py-3">
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.back()}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ArrowBack sx={{ fontSize: 24, color: '#000000' }} />
@@ -379,7 +386,7 @@ export default function ProfilePage() {
         {/* Back to Chat Button */}
         <div className="pt-4 pb-8">
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.back()}
             className="w-full py-3 bg-black text-white rounded-2xl font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
           >
             <ArrowBack sx={{ fontSize: 18 }} />
